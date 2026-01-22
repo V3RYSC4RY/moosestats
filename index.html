@@ -1835,7 +1835,7 @@
                 <span class="player-name" style="color:${colorMap[p.displayName || p.fallbackName] || p.color || '#66c0f4'}">${p.displayName || p.fallbackName}</span>
                 ${
                   p.needsSteam64
-                    ? '<span class="player-missing">Add Steam64 ID</span>'
+                    ? '<span class="player-missing">Add SteamID64</span>'
                     : p.missing === true
                     ? '<span class="player-missing">Missing on server</span>'
                     : ''
@@ -1853,11 +1853,11 @@
                 <input class="player-steam-url" type="text" value="${p.storedSteamUrl || p.steamUrl || ''}" />
               </div>
               <div class="player-field">
-                <label>Steam64 ID</label>
+                <label>SteamID64</label>
                 <input class="player-steam-id" type="text" value="${p.storedSteamId || p.steamId || ''}" />
               </div>
               <div class="player-actions">
-                <button class="player-help" title="Lookup Steam64 ID">?</button>
+                <button class="player-help" title="Lookup SteamID64">?</button>
                 <button class="player-refresh" title="Refresh player">↻</button>
                 <button class="player-save">Save</button>
               </div>
@@ -2006,7 +2006,7 @@
           const steamUrl = urlInput ? urlInput.value.trim() : '';
           const steamId = idInput ? idInput.value.trim() : '';
           if (!steamName && !steamUrl && !steamId) {
-            alert('Enter a Steam Name, Steam URL, or Steam64 ID.');
+            alert('Enter a Steam Name, Steam URL, or SteamID64.');
             return;
           }
           try {

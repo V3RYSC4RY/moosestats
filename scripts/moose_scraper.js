@@ -1,4 +1,5 @@
 const { chromium } = require('playwright');
+const { expect } = require('playwright/test');
 const fs = require('fs');
 const path = require('path');
 
@@ -57,6 +58,174 @@ const TAB_HEADER_MARKERS = {
 
 const FALLBACK_AVATAR =
   'https://steamcommunity-a.akamaihd.net/public/shared/images/responsive/share_steam_logo.png';
+
+const RETRY_BACKOFFS_MS = [250, 500, 750];
+
+function isRetryableDetachError(err) {
+  const message = String(err && err.message ? err.message : err);
+  return message.includes('not attached to the DOM') || message.includes('Target closed');
+}
+
+function delayMs(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function getSearchInput(page) {
+  return page
+    .locator(
+      'input[placeholder="Search" i], input[type="search"], table input[type="text"], input.mud-input-root-outlined, input.mud-input-root, input.mud-input-slot'
+    )
+    .first();
+}
+
+function getListContainer(page) {
+  return page.locator('table tbody').first();
+}
+
+function escapeForAttrContains(value) {
+  return String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+function getPlayerRowLocator(page, key) {
+  const safeKey = escapeForAttrContains(key);
+  return page
+    .locator('table tbody tr', { has: page.locator(`a[href*="${safeKey}"]`) })
+    .first();
+}
+
+async function withDetachRetry(action, options = {}) {
+  const {
+    playerName = 'Unknown player',
+    actionLabel = 'action',
+    attempts = 3,
+    backoffs = RETRY_BACKOFFS_MS,
+    log,
+  } = options;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await action();
+    } catch (err) {
+      if (!isRetryableDetachError(err) || attempt === attempts) {
+        throw err;
+      }
+      const waitMs = backoffs[attempt - 1] || backoffs[backoffs.length - 1] || 250;
+      const message = `Retry ${attempt}/${attempts} for ${playerName} (${actionLabel})`;
+      if (typeof log === 'function') log(message);
+      else console.warn(message);
+      await delayMs(waitMs);
+    }
+  }
+}
+
+async function safeClick(page, locatorFn, options = {}) {
+  const {
+    containerLocatorFn,
+    playerName = 'Unknown player',
+    actionLabel = 'click',
+    log,
+    clickOptions = {},
+    useTrial = true,
+  } = options;
+  return withDetachRetry(
+    async () => {
+      if (containerLocatorFn) {
+        const container = containerLocatorFn();
+        await expect(container).toBeVisible();
+        await expect(container).toBeAttached();
+      }
+      const locator = locatorFn();
+      await expect(locator).toBeVisible();
+      await expect(locator).toBeAttached();
+
+      let needsScroll = !useTrial;
+      if (useTrial) {
+        try {
+          await locator.click({ trial: true });
+        } catch (err) {
+          if (isRetryableDetachError(err)) throw err;
+          needsScroll = true;
+        }
+      }
+
+      if (needsScroll) {
+        const box = await locator.boundingBox();
+        const viewport = page.viewportSize();
+        const inViewport =
+          box &&
+          viewport &&
+          box.x >= 0 &&
+          box.y >= 0 &&
+          box.x + box.width <= viewport.width &&
+          box.y + box.height <= viewport.height;
+        if (!inViewport) {
+          await locator.scrollIntoViewIfNeeded();
+        }
+      }
+
+      await locator.click(clickOptions);
+    },
+    { playerName, actionLabel, log }
+  );
+}
+
+async function safeScrollIntoView(page, locatorFn, options = {}) {
+  const { containerLocatorFn, playerName = 'Unknown player', actionLabel = 'scroll', log } = options;
+  return withDetachRetry(
+    async () => {
+      if (containerLocatorFn) {
+        const container = containerLocatorFn();
+        await expect(container).toBeVisible();
+        await expect(container).toBeAttached();
+      }
+      const locator = locatorFn();
+      await expect(locator).toBeVisible();
+      await expect(locator).toBeAttached();
+      const box = await locator.boundingBox();
+      const viewport = page.viewportSize();
+      const inViewport =
+        box &&
+        viewport &&
+        box.x >= 0 &&
+        box.y >= 0 &&
+        box.x + box.width <= viewport.width &&
+        box.y + box.height <= viewport.height;
+      if (!inViewport) {
+        await locator.scrollIntoViewIfNeeded();
+      }
+    },
+    { playerName, actionLabel, log }
+  );
+}
+
+async function safeHover(page, locatorFn, options = {}) {
+  const { containerLocatorFn, playerName = 'Unknown player', actionLabel = 'hover', log } = options;
+  return withDetachRetry(
+    async () => {
+      if (containerLocatorFn) {
+        const container = containerLocatorFn();
+        await expect(container).toBeVisible();
+        await expect(container).toBeAttached();
+      }
+      const locator = locatorFn();
+      await expect(locator).toBeVisible();
+      await expect(locator).toBeAttached();
+      const box = await locator.boundingBox();
+      const viewport = page.viewportSize();
+      const inViewport =
+        box &&
+        viewport &&
+        box.x >= 0 &&
+        box.y >= 0 &&
+        box.x + box.width <= viewport.width &&
+        box.y + box.height <= viewport.height;
+      if (!inViewport) {
+        await locator.scrollIntoViewIfNeeded();
+      }
+      await locator.hover({ force: true });
+    },
+    { playerName, actionLabel, log }
+  );
+}
 
 function steamIdFromUrl(steamUrl) {
   try {
@@ -191,12 +360,15 @@ async function fetchSteamProfile(page, steamUrl, steamIdInput) {
 }
 
 async function selectServer(page, serverName, report) {
-  const dropdown = page.locator('input.mud-select-input').first();
+  const dropdownLocatorFn = () => page.locator('input.mud-select-input').first();
   report?.('Waiting for server dropdown...');
-  await dropdown.waitFor({ state: 'visible', timeout: 10000 });
-  await dropdown.scrollIntoViewIfNeeded();
+  await expect(dropdownLocatorFn()).toBeVisible({ timeout: 10000 });
+  await expect(dropdownLocatorFn()).toBeAttached({ timeout: 10000 });
   report?.('Opening server dropdown...');
-  await dropdown.click({ force: true });
+  await safeClick(page, dropdownLocatorFn, {
+    actionLabel: 'open server dropdown',
+    clickOptions: { force: true },
+  });
 
   const popover = page.locator('.mud-popover').first();
   let popoverVisible = true;
@@ -206,25 +378,30 @@ async function selectServer(page, serverName, report) {
     popoverVisible = false;
   }
   if (!popoverVisible) {
-    const selectRoot = page.locator('.mud-select').first();
-    if ((await selectRoot.count()) > 0) {
-      await selectRoot.click({ force: true });
+    const selectRootLocatorFn = () => page.locator('.mud-select').first();
+    if ((await selectRootLocatorFn().count()) > 0) {
+      await safeClick(page, selectRootLocatorFn, {
+        actionLabel: 'open server dropdown fallback',
+        clickOptions: { force: true },
+      });
     }
-    await dropdown.focus();
+    await dropdownLocatorFn().focus();
     await page.keyboard.press('ArrowDown');
     await popover.waitFor({ state: 'visible', timeout: 5000 });
   }
 
   report?.('Choosing server option...');
-  const items = popover.locator('.mud-list-item');
-  await items.first().waitFor({ state: 'visible', timeout: 10000 });
+  const itemsLocatorFn = () => page.locator('.mud-popover .mud-list-item');
+  await expect(itemsLocatorFn().first()).toBeVisible({ timeout: 10000 });
   const desiredIndex = /biweekly/i.test(serverName) ? 6 : 0;
-  let option = items.nth(desiredIndex);
-  if ((await items.count()) <= desiredIndex) {
-    option = items.filter({ hasText: serverName }).first();
+  let optionLocatorFn = () => itemsLocatorFn().nth(desiredIndex);
+  if ((await itemsLocatorFn().count()) <= desiredIndex) {
+    optionLocatorFn = () => itemsLocatorFn().filter({ hasText: serverName }).first();
   }
-  await option.scrollIntoViewIfNeeded();
-  await option.click({ force: true });
+  await safeClick(page, optionLocatorFn, {
+    actionLabel: 'select server option',
+    clickOptions: { force: true },
+  });
   await page.waitForTimeout(1500);
   await page.locator('table tbody').first().waitFor({ state: 'visible' });
 
@@ -235,17 +412,19 @@ async function selectStatsTab(page, tabKey, report) {
   const tabDef = TAB_DEFS[tabKey] || { label: tabKey };
   const tabLabel = tabDef.label || tabKey;
   report?.(`Switching to ${tabLabel} tab...`);
-  const tryClick = async (locator) => {
-    if ((await locator.count()) === 0) return false;
-    await locator.scrollIntoViewIfNeeded();
-    await locator.click({ force: true });
+  const tryClick = async (locatorFn) => {
+    if ((await locatorFn().count()) === 0) return false;
+    await safeClick(page, locatorFn, {
+      actionLabel: `tab ${tabLabel}`,
+      clickOptions: { force: true },
+    });
     await page.waitForTimeout(500);
     return true;
   };
 
-  const tabByExactText = page.getByRole('tab', { name: tabLabel, exact: true });
+  const tabByExactText = () => page.getByRole('tab', { name: tabLabel, exact: true });
   if (await tryClick(tabByExactText)) return;
-  const tabByText = page.locator('[role="tab"]', { hasText: tabLabel }).first();
+  const tabByText = () => page.locator('[role="tab"]', { hasText: tabLabel }).first();
   if (await tryClick(tabByText)) return;
   report?.(`Tab ${tabLabel} not found; continuing.`);
 }
@@ -312,21 +491,20 @@ async function mapColumnsByLabel(page, labels) {
 }
 
 async function searchPlayerRow(page, profile) {
-  const searchInput = page
-    .locator(
-      'input[placeholder="Search" i], input[type="search"], table input[type="text"], input.mud-input-root-outlined, input.mud-input-root, input.mud-input-slot'
-    )
-    .first();
-  await searchInput.waitFor({ state: 'visible' });
-
-  const rowBase = page.locator('table tbody tr');
+  const searchInput = getSearchInput(page);
+  await expect(searchInput).toBeVisible({ timeout: 10000 });
+  await expect(searchInput).toBeAttached({ timeout: 10000 });
+  const listContainerFn = () => getListContainer(page);
+  await expect(listContainerFn()).toBeVisible({ timeout: 10000 });
+  await expect(listContainerFn()).toBeAttached({ timeout: 10000 });
 
   const tryAnchor = async (key) => {
     if (!key) return null;
-    const row = rowBase.filter({ has: page.locator(`a[href*="${key}"]`) }).first();
-    if ((await row.count()) > 0) {
-      await row.first().waitFor();
-      return row.first();
+    const rowLocatorFn = () => getPlayerRowLocator(page, key);
+    if ((await rowLocatorFn().count()) > 0) {
+      await expect(rowLocatorFn()).toBeVisible({ timeout: 10000 });
+      await expect(rowLocatorFn()).toBeAttached({ timeout: 10000 });
+      return key;
     }
     return null;
   };
@@ -367,29 +545,34 @@ async function searchPlayerRow(page, profile) {
 }
 
 async function resetTableSearch(page) {
-  const searchInput = page
-    .locator(
-      'input[placeholder="Search" i], input[type="search"], table input[type="text"], input.mud-input-root-outlined, input.mud-input-root, input.mud-input-slot'
-    )
-    .first();
+  const searchInput = getSearchInput(page);
   if ((await searchInput.count()) === 0) return;
+  await expect(searchInput).toBeVisible();
+  await expect(searchInput).toBeAttached();
   await searchInput.fill('');
   await page.keyboard.press('Enter');
   await page.waitForTimeout(400);
 }
 
-async function extractStatsFromRow(row, columnMap, page, metricLabels) {
-  const tds = row.locator('td');
+async function extractStatsFromRow(rowLocatorFn, columnMap, page, metricLabels, options = {}) {
+  const { playerName = 'Unknown player', listContainerFn, log } = options;
+  const cellLocatorFn = (idx) => rowLocatorFn().locator('td').nth(idx);
 
-  async function getNumeric(cell) {
+  async function getNumeric(cellLocator) {
+    const cell = cellLocator();
     const text = (await cell.innerText()).trim();
     const numeric = text.replace(/[^\d.]/g, '');
     return Number(numeric || 0);
   }
 
-  async function getTooltipNumber(cell) {
+  async function getTooltipNumber(cellLocator, label) {
     try {
-      await cell.hover({ force: true });
+      await safeHover(page, cellLocator, {
+        containerLocatorFn: listContainerFn,
+        playerName,
+        actionLabel: `${label} tooltip`,
+        log,
+      });
       await page.waitForTimeout(250);
       const popVals = await page.evaluate(() => {
         const selectors = [
@@ -417,18 +600,19 @@ async function extractStatsFromRow(row, columnMap, page, metricLabels) {
     const idx = columnMap[label];
     if (idx == null) {
       if (label === 'Headshot %' && columnMap.Headshots != null) {
-        const hsCell = tds.nth(columnMap.Headshots);
-        const tooltip = await getTooltipNumber(hsCell);
+        const tooltip = await getTooltipNumber(
+          () => cellLocatorFn(columnMap.Headshots),
+          label
+        );
         if (tooltip != null) return tooltip;
       }
       return 0;
     }
-    const cell = tds.nth(idx);
     if (label === 'Headshot %') {
-      const tooltip = await getTooltipNumber(cell);
+      const tooltip = await getTooltipNumber(() => cellLocatorFn(idx), label);
       if (tooltip != null) return tooltip;
     }
-    return getNumeric(cell);
+    return getNumeric(() => cellLocatorFn(idx));
   }
 
   const labels = metricLabels && metricLabels.length ? metricLabels : Object.keys(columnMap || {});
@@ -443,21 +627,49 @@ async function extractStatsFromRow(row, columnMap, page, metricLabels) {
 }
 
 async function getPlayerStats(page, profile, columnMap, metricLabels) {
-  const row = await searchPlayerRow(page, profile);
-  if (metricLabels && metricLabels.includes('Scientist') && columnMap?.Scientist != null) {
-    const scientistCell = row.locator('td').nth(columnMap.Scientist);
-    try {
-      await scientistCell.waitFor({ state: 'visible', timeout: 4000 });
-      await page.waitForFunction(
-        (el) => /\d/.test((el && el.textContent) || ''),
-        scientistCell,
-        { timeout: 4000 }
-      );
-    } catch {
-      // continue even if PvE cell doesn't resolve quickly
-    }
-  }
-  return extractStatsFromRow(row, columnMap, page, metricLabels);
+  const label =
+    profile.displayName || profile.fallbackName || profile.steamId || profile.steamUrl || 'Unknown player';
+  const rowKey = await searchPlayerRow(page, profile);
+  const listContainerFn = () => getListContainer(page);
+  const rowLocatorFn = () => getPlayerRowLocator(page, rowKey);
+  const retryLog = (message) => console.warn(message);
+
+  return withDetachRetry(
+    async () => {
+      await expect(listContainerFn()).toBeVisible();
+      await expect(listContainerFn()).toBeAttached();
+      const row = rowLocatorFn();
+      await expect(row).toBeVisible();
+      await expect(row).toBeAttached();
+      await safeScrollIntoView(page, rowLocatorFn, {
+        containerLocatorFn: listContainerFn,
+        playerName: label,
+        actionLabel: 'player row',
+        log: retryLog,
+      });
+
+      if (metricLabels && metricLabels.includes('Scientist') && columnMap?.Scientist != null) {
+        const scientistCell = rowLocatorFn().locator('td').nth(columnMap.Scientist);
+        try {
+          await expect(scientistCell).toBeVisible({ timeout: 4000 });
+          await page.waitForFunction(
+            (el) => /\d/.test((el && el.textContent) || ''),
+            scientistCell,
+            { timeout: 4000 }
+          );
+        } catch {
+          // continue even if PvE cell doesn't resolve quickly
+        }
+      }
+
+      return extractStatsFromRow(rowLocatorFn, columnMap, page, metricLabels, {
+        playerName: label,
+        listContainerFn,
+        log: retryLog,
+      });
+    },
+    { playerName: label, actionLabel: 'read stats', log: retryLog }
+  );
 }
 
 async function scrapePlayers(players, serverName = 'US Monthly (Premium)', onStatus, options = {}) {
