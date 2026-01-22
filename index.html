@@ -187,7 +187,7 @@
       box-shadow: 0 0 0 1px rgba(102, 192, 244, 0.55);
     }
     .player-save {
-      align-self: center;
+      align-self: flex-end;
       background: rgba(255,255,255,0.06);
       color: var(--text-primary);
       border: 1px solid rgba(255,255,255,0.12);
@@ -198,6 +198,30 @@
       transition: box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
     }
     .player-save:hover {
+      box-shadow: 0 0 16px rgba(102, 192, 244, 0.35);
+      border-color: rgba(102, 192, 244, 0.6);
+    }
+    .player-actions {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      margin-top: 4px;
+      min-height: 40px;
+    }
+    .player-help {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      background: rgba(255,255,255,0.06);
+      color: var(--text-primary);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+    .player-help:hover {
       box-shadow: 0 0 16px rgba(102, 192, 244, 0.35);
       border-color: rgba(102, 192, 244, 0.6);
     }
@@ -1824,7 +1848,10 @@
                 <label>Steam64 ID</label>
                 <input class="player-steam-id" type="text" value="${p.storedSteamId || p.steamId || ''}" />
               </div>
-              <button class="player-save">Save</button>
+              <div class="player-actions">
+                <button class="player-help" title="Lookup Steam64 ID">?</button>
+                <button class="player-save">Save</button>
+              </div>
             </div>
           </div>`
         )
@@ -2009,6 +2036,7 @@
         const nameInput = card.querySelector('.player-steam-name');
         const urlInput = card.querySelector('.player-steam-url');
         const idInput = card.querySelector('.player-steam-id');
+        const helpBtn = card.querySelector('.player-help');
 
         const applyResolved = (resolved) => {
           if (!resolved) return;
@@ -2046,18 +2074,46 @@
           }
         };
 
+        const getVanityId = () => {
+          const id = idInput ? idInput.value.trim() : '';
+          if (id && !/^\d{17}$/.test(id)) return id;
+          const url = urlInput ? urlInput.value.trim() : '';
+          const match = url.match(/steamcommunity\.com\/id\/([^/]+)/i);
+          return match?.[1] || '';
+        };
+
+        const updateHelpButton = () => {
+          if (!helpBtn) return;
+          const vanity = getVanityId();
+          helpBtn.style.display = vanity ? 'inline-flex' : 'none';
+          helpBtn.dataset.vanity = vanity;
+        };
+
         if (urlInput) {
           urlInput.addEventListener('blur', resolveFromUrl);
+          urlInput.addEventListener('input', updateHelpButton);
         }
         if (idInput) {
           idInput.addEventListener('blur', resolveFromId);
           idInput.addEventListener('input', resolveFromId);
+          idInput.addEventListener('input', updateHelpButton);
         }
         if (nameInput) {
           nameInput.addEventListener('blur', () => {
             // keep focus styling consistent
           });
         }
+
+        if (helpBtn) {
+          helpBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const vanity = helpBtn.dataset.vanity || getVanityId();
+            if (!vanity) return;
+            window.open(`https://steamid.io/lookup/${encodeURIComponent(vanity)}`, '_blank', 'noopener');
+          });
+        }
+
+        updateHelpButton();
 
         card.addEventListener('mouseenter', () => {
           if (draggingCard) return;
