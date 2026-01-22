@@ -461,7 +461,10 @@ async function getPlayerStats(page, profile, columnMap, metricLabels) {
 }
 
 async function scrapePlayers(players, serverName = 'US Monthly (Premium)', onStatus, options = {}) {
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+  });
   const page = await browser.newPage();
   const report = (message) => {
     if (typeof onStatus === 'function') onStatus(message);

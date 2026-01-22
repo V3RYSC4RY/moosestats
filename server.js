@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const pkg = require('./package.json');
 const { scrapePlayers, steamIdFromUrl, FALLBACK_AVATAR } = require('./scripts/moose_scraper');
 
 const DATA_DIR = __dirname;
@@ -208,6 +209,7 @@ async function hydratePlayers(players) {
 }
 
 const app = express();
+let refreshInFlight = false;
 app.use(express.json());
 app.use((req, res, next) => {
   res.set('Cache-Control', 'no-store');
@@ -218,6 +220,14 @@ app.use(express.static(__dirname));
 app.get('/api/players', async (req, res) => {
   const players = await hydratePlayers(loadPlayers());
   res.json(withPlayerIds(players));
+});
+
+app.get('/api/health', (req, res) => {
+  res.json({
+    ok: true,
+    time: new Date().toISOString(),
+    version: pkg.version || '0.0.0',
+  });
 });
 
 app.post('/api/players', async (req, res) => {
@@ -536,7 +546,13 @@ app.post('/api/refresh', async (req, res) => {
   try {
     const serverName = normalizeServerName(req.body?.serverName);
     const strategy = req.body?.strategy;
+    if (refreshInFlight) {
+      return res.status(429).json({ error: 'Refresh already in progress' });
+    }
+    refreshInFlight = true;
     setRefreshStatus('Starting refresh...');
+    const startedAt = Date.now();
+    console.log(`[refresh] start server=${serverName} players=${players.length} strategy=${strategy || 'perTab'}`);
     const result = await scrapePlayers(players, serverName, setRefreshStatus, { strategy });
     const profiles = attachPlayerIds(result.profiles, players);
     const response = {
@@ -559,14 +575,18 @@ app.post('/api/refresh', async (req, res) => {
       updatedAt: Date.now(),
     });
     res.json(response);
+    const elapsed = Date.now() - startedAt;
     if (result.timings) {
       console.log(`[refresh timing] ${result.timings.strategy}: ${result.timings.durationMs}ms`);
     }
+    console.log(`[refresh] done in ${elapsed}ms`);
     setRefreshStatus('Refresh complete.');
   } catch (err) {
-    console.error(err);
+    console.error('[refresh] error', err?.stack || err);
     setRefreshStatus(`Refresh error: ${err.message || 'Failed'}`);
     res.status(500).json({ error: err.message || 'Failed to refresh' });
+  } finally {
+    refreshInFlight = false;
   }
 });
 
@@ -580,6 +600,8 @@ app.get('/api/data', async (req, res) => {
   if (players.length >= MIN_COMPARE_PLAYERS) {
     try {
       setRefreshStatus('Starting refresh...');
+      const startedAt = Date.now();
+      console.log(`[data] cache miss, scraping server=${serverName} players=${players.length}`);
       const result = await scrapePlayers(players, serverName, setRefreshStatus);
       const profiles = attachPlayerIds(result.profiles, players);
       const nextCache = {
@@ -591,8 +613,10 @@ app.get('/api/data', async (req, res) => {
         updatedAt: Date.now(),
       };
       setServerCache(store, serverName, nextCache);
+      console.log(`[data] scrape done in ${Date.now() - startedAt}ms`);
       return res.json(buildResponseFromCache(nextCache, players));
     } catch (err) {
+      console.error('[data] refresh error', err?.stack || err);
       return res.status(500).json({ error: err.message || 'Failed to refresh' });
     }
   }
@@ -638,6 +662,6 @@ app.post('/api/resolve-steam', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on 0.0.0.0:${PORT}`);
 });
