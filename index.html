@@ -208,7 +208,8 @@
       margin-top: 4px;
       min-height: 40px;
     }
-    .player-help {
+    .player-help,
+    .player-refresh {
       position: absolute;
       left: 0;
       bottom: 0;
@@ -221,7 +222,8 @@
       cursor: pointer;
       transition: box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
     }
-    .player-help:hover {
+    .player-help:hover,
+    .player-refresh:hover {
       box-shadow: 0 0 16px rgba(102, 192, 244, 0.35);
       border-color: rgba(102, 192, 244, 0.6);
     }
@@ -727,14 +729,14 @@
       if (!container) return [];
       return Array.from(container.querySelectorAll('.player-card'))
         .map((card) => card.getAttribute('data-steamid'))
-        .filter((id) => id && /^\d{17}$/.test(id));
+        .filter((id) => id);
     }
 
     function reorderProfilesByKeys(keys) {
       if (!lastData || !Array.isArray(lastData.profiles)) return;
       const map = new Map();
       lastData.profiles.forEach((p) => {
-        const key = p.displayName || p.fallbackName;
+        const key = p.steamId || p.displayName || p.fallbackName;
         if (key) map.set(key, p);
       });
       const ordered = keys.map((k) => map.get(k)).filter(Boolean);
@@ -906,7 +908,7 @@
         const minLight = 32;
         const maxLight = 68;
         profiles.forEach((p) => {
-          const key = p.displayName || p.fallbackName;
+          const key = p.steamId || p.displayName || p.fallbackName;
           const base = p.color || '#66c0f4';
           const { h, s, l } = hexToHsl(base);
           const sat = Math.max(minSat, Math.min(90, s));
@@ -996,7 +998,7 @@
       };
       const rows = (data.profiles || [])
         .map((p) => {
-          const key = p.displayName || p.fallbackName;
+          const key = p.steamId || p.displayName || p.fallbackName;
           const raw = data.stats && data.stats[key] ? data.stats[key][metric] : 0;
           const value = metric === 'Headshot %' ? Math.round(raw) : raw;
           return { key, value, profile: p };
@@ -1825,7 +1827,7 @@
       container.innerHTML = profiles
         .map(
           (p) => `
-          <div class="player-card" data-player-id="${p.playerId ?? ''}" data-player-key="${p.displayName || p.fallbackName || ''}" data-steamid="${p.steamId || ''}" style="border-color:${hexToRgba(colorMap[p.displayName || p.fallbackName] || p.color || '#66c0f4', 0.35)}; opacity:${p.missing === true ? '0.6' : '1'};">
+          <div class="player-card" data-player-id="${p.playerId ?? ''}" data-player-key="${p.steamId || p.displayName || p.fallbackName || ''}" data-steamid="${p.steamId || ''}" data-needs-steam64="${p.needsSteam64 ? '1' : '0'}" style="border-color:${hexToRgba(colorMap[p.displayName || p.fallbackName] || p.color || '#66c0f4', 0.35)}; opacity:${p.missing === true ? '0.6' : '1'};">
             <button class="remove-btn" data-steamid="${p.steamId || ''}" data-steamurl="${p.steamUrl || ''}" title="Remove"><span>×</span></button>
             <a class="player-link" href="${p.steamUrl}" target="_blank" rel="noopener noreferrer">
               <img class="avatar" src="${p.avatarUrl || FALLBACK_AVATAR}" alt="${p.displayName || p.fallbackName} avatar" />
@@ -1856,6 +1858,7 @@
               </div>
               <div class="player-actions">
                 <button class="player-help" title="Lookup Steam64 ID">?</button>
+                <button class="player-refresh" title="Refresh player">↻</button>
                 <button class="player-save">Save</button>
               </div>
             </div>
@@ -2043,6 +2046,7 @@
         const urlInput = card.querySelector('.player-steam-url');
         const idInput = card.querySelector('.player-steam-id');
         const helpBtn = card.querySelector('.player-help');
+        const refreshBtn = card.querySelector('.player-refresh');
 
         const applyResolved = (resolved) => {
           if (!resolved) return;
@@ -2088,21 +2092,28 @@
           return match?.[1] || '';
         };
 
-        const updateHelpButton = () => {
-          if (!helpBtn) return;
+        const updateActionButtons = () => {
           const vanity = getVanityId();
-          helpBtn.style.display = vanity ? 'inline-flex' : 'none';
-          helpBtn.dataset.vanity = vanity;
+          const attrNeeds = card.getAttribute('data-needs-steam64') === '1';
+          const hasValidId = idInput && /^\d{17}$/.test(idInput.value.trim());
+          const needsSteam64 = attrNeeds || (!hasValidId && !!vanity);
+          if (helpBtn) {
+            helpBtn.style.display = vanity && needsSteam64 ? 'inline-flex' : 'none';
+            helpBtn.dataset.vanity = vanity;
+          }
+          if (refreshBtn) {
+            refreshBtn.style.display = hasValidId && !needsSteam64 ? 'inline-flex' : 'none';
+          }
         };
 
         if (urlInput) {
           urlInput.addEventListener('blur', resolveFromUrl);
-          urlInput.addEventListener('input', updateHelpButton);
+          urlInput.addEventListener('input', updateActionButtons);
         }
         if (idInput) {
           idInput.addEventListener('blur', resolveFromId);
           idInput.addEventListener('input', resolveFromId);
-          idInput.addEventListener('input', updateHelpButton);
+          idInput.addEventListener('input', updateActionButtons);
         }
         if (nameInput) {
           nameInput.addEventListener('blur', () => {
@@ -2119,7 +2130,54 @@
           });
         }
 
-        updateHelpButton();
+        if (refreshBtn) {
+          refreshBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const cardId = card.getAttribute('data-player-id');
+            if (!cardId) return;
+            let statusInterval = null;
+            try {
+              setLoading(true, 'Loading...');
+              setRefreshStatus('Refreshing player...');
+              statusInterval = setInterval(async () => {
+                try {
+                  const resp = await fetch('/api/refresh-status');
+                  if (resp.ok) {
+                    const data = await resp.json();
+                    setRefreshStatus(data.message || '');
+                  }
+                } catch {
+                  // ignore status errors
+                }
+              }, 1000);
+              const serverName = serverSelect ? serverSelect.value : null;
+              const resp = await fetch(`/api/players/${encodeURIComponent(cardId)}/refresh`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ serverName }),
+              });
+              if (!resp.ok) {
+                const err = await resp.json();
+                alert(err.error || 'Refresh failed');
+                return;
+              }
+              const data = await resp.json();
+              if (data && data.tabs) {
+                lastData = data;
+                applyRender(data);
+              } else {
+                await loadData();
+              }
+            } catch (err) {
+              alert('Error refreshing player');
+            } finally {
+              if (statusInterval) clearInterval(statusInterval);
+              setLoading(false);
+            }
+          });
+        }
+
+        updateActionButtons();
 
         card.addEventListener('mouseenter', () => {
           if (draggingCard) return;

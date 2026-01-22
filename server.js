@@ -377,6 +377,42 @@ app.put('/api/players/:id', async (req, res) => {
   res.json(withPlayerIds(hydrated));
 });
 
+app.post('/api/players/:id/refresh', async (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: 'Invalid player id' });
+  if (refreshInFlight) return res.status(429).json({ error: 'Refresh already in progress' });
+  const serverName = normalizeServerName(req.body?.serverName);
+  const players = await hydratePlayers(loadPlayers());
+  if (id < 0 || id >= players.length) return res.status(404).json({ error: 'Player not found' });
+  const player = players[id];
+  if (!isValidSteamId(player.steamId)) {
+    return res.status(400).json({ error: 'Steam64 ID required' });
+  }
+  refreshInFlight = true;
+  setRefreshStatus(`Refreshing player ${id + 1}...`);
+  try {
+    const result = await scrapePlayers([player], serverName, setRefreshStatus);
+    const store = loadCacheStore();
+    const serverCache = mergePlayerStats(getServerCache(store, serverName), {
+      serverName,
+      profiles: result.profiles || [],
+      tabs: result.tabs || {},
+      missing: result.missing || [],
+      serverInfo: result.serverInfo || null,
+    });
+    setServerCache(store, serverName, serverCache);
+    const response = buildResponseFromCache(serverCache, players);
+    res.json(response);
+    setRefreshStatus('Refresh complete.');
+  } catch (err) {
+    console.error('[player refresh] error', err?.stack || err);
+    setRefreshStatus(`Refresh error: ${err.message || 'Failed'}`);
+    res.status(500).json({ error: err.message || 'Failed to refresh player' });
+  } finally {
+    refreshInFlight = false;
+  }
+});
+
 app.post('/api/players/reorder', async (req, res) => {
   const order = Array.isArray(req.body?.order) ? req.body.order.map(String) : [];
   const serverName = normalizeServerName(req.body?.serverName);
