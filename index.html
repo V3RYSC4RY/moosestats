@@ -10,15 +10,15 @@
     :root { --steam-bg: #0f1a24; --steam-panel: #0b141d; --steam-accent: #66c0f4; --text-primary: #e5f1ff; --text-secondary: #9bb6cc; --card-border: rgba(102, 192, 244, 0.25); }
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; height: 100%; overflow-x: hidden; }
-    body { font-family: "Segoe UI", Roboto, system-ui, -apple-system, sans-serif; background: radial-gradient(circle at 20% 20%, rgba(102,192,244,0.08), transparent 30%), radial-gradient(circle at 80% 0%, rgba(102,192,244,0.08), transparent 30%), var(--steam-bg); color: var(--text-primary); display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-    .panel { background: linear-gradient(135deg, rgba(20,33,44,0.8), rgba(12,20,28,0.95)); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px; width: 90%; max-width: 2000px; box-shadow: 0 20px 50px rgba(0,0,0,0.45); }
+    body { font-family: "Segoe UI", Roboto, system-ui, -apple-system, sans-serif; background: radial-gradient(circle at 20% 20%, rgba(102,192,244,0.08), transparent 30%), radial-gradient(circle at 80% 0%, rgba(102,192,244,0.08), transparent 30%), var(--steam-bg); color: var(--text-primary); display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: calc(12px + env(safe-area-inset-top)) 24px 24px; }
+    .panel { background: linear-gradient(135deg, rgba(20,33,44,0.8), rgba(12,20,28,0.95)); border: 1px solid var(--card-border); border-radius: 12px; padding: 0 20px 20px; width: 90%; max-width: 2000px; box-shadow: 0 20px 50px rgba(0,0,0,0.45); }
     h1 { margin: 0 0 20px 0; font-weight: 500; letter-spacing: 0.5px; }
     .title-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 10px;
+      margin: 12px 0 12px;
     }
     .title-row h1 { margin: 0; }
     .title-row__right {
