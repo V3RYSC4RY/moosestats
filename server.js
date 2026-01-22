@@ -14,6 +14,10 @@ const SERVER_NAME = 'US Monthly (Premium)';
 const ALLOWED_SERVERS = ['US Monthly (Premium)', 'US Biweekly (Premium)'];
 let lastRefreshStatus = { message: 'Idle', at: Date.now() };
 
+function isValidSteamId(steamId) {
+  return /^\d{17}$/.test(String(steamId || ''));
+}
+
 function normalizeServerName(serverName) {
   if (!serverName) return SERVER_NAME;
   const trimmed = String(serverName).trim();
@@ -164,6 +168,31 @@ function setServerCache(store, serverName, cache) {
   saveCache(store);
 }
 
+function buildFallbackResponse(serverName, players) {
+  const profiles = (players || []).map((player) => ({
+    steamUrl: player.steamUrl,
+    steamId: player.steamId,
+    displayName: player.displayName || player.steamId || player.steamUrl,
+    fallbackName: player.displayName || player.steamId || player.steamUrl,
+    avatarUrl: player.avatarUrl || FALLBACK_AVATAR,
+    needsSteam64: !!(
+      !isValidSteamId(player.steamId) &&
+      (player.steamId || /steamcommunity\.com\/id\/[^/]+/i.test(player.steamUrl || ''))
+    ),
+  }));
+  return {
+    serverName,
+    metrics: [],
+    stats: {},
+    profiles: attachPlayerIds(profiles, players),
+    tabs: {},
+    missing: [],
+    serverInfo: null,
+    updatedAt: null,
+    cached: false,
+  };
+}
+
 async function normalizePlayer(steamUrl) {
   const resolved = await resolveSteamId64(steamUrl);
   const normalizedUrl = buildSteamUrl(steamUrl, resolved);
@@ -241,6 +270,12 @@ app.post('/api/players', async (req, res) => {
   savePlayers(players);
   try {
     const server = normalizeServerName(serverName);
+    if (!isValidSteamId(normalized.steamId)) {
+      const store = loadCacheStore();
+      const cache = getServerCache(store, server);
+      const hydrated = await hydratePlayers(players);
+      return res.json(buildResponseFromCache(cache, hydrated) || buildFallbackResponse(server, hydrated));
+    }
     const result = await scrapePlayers([normalized], server, setRefreshStatus);
     const store = loadCacheStore();
     const serverCache = mergePlayerStats(getServerCache(store, server), {
@@ -457,8 +492,36 @@ function filterStatsToProfiles(tabs, profiles) {
 function buildResponseFromCache(cache, players) {
   if (!cache) return null;
   const mergedProfiles = mergeCachedProfiles(cache.profiles || [], players);
-  const profilesWithIds = attachPlayerIds(mergedProfiles, players);
-  const tabs = filterStatsToProfiles(cache.tabs || {}, mergedProfiles);
+  const mergedIds = new Set(
+    (mergedProfiles || [])
+      .map((p) => p.steamId || steamIdFromUrl(p.steamUrl))
+      .filter(Boolean)
+      .map(String)
+  );
+  const missingProfiles = (players || [])
+    .filter((player) => {
+      const id = player.steamId || steamIdFromUrl(player.steamUrl);
+      return id && !mergedIds.has(String(id));
+    })
+    .map((player) => ({
+      steamUrl: player.steamUrl,
+      steamId: player.steamId,
+      displayName: player.displayName || player.steamId || player.steamUrl,
+      fallbackName: player.displayName || player.steamId || player.steamUrl,
+      avatarUrl: player.avatarUrl || FALLBACK_AVATAR,
+    }));
+  const combinedProfiles = [...mergedProfiles, ...missingProfiles];
+  const profilesWithIds = attachPlayerIds(combinedProfiles, players).map((profile) => {
+    const candidateId = profile.steamId || profile.storedSteamId || null;
+    const needsSteam64 =
+      !isValidSteamId(candidateId) &&
+      (candidateId || /steamcommunity\.com\/id\/[^/]+/i.test(profile.steamUrl || profile.storedSteamUrl || ''));
+    return {
+      ...profile,
+      needsSteam64,
+    };
+  });
+  const tabs = filterStatsToProfiles(cache.tabs || {}, combinedProfiles);
   return {
     serverName: cache.serverName || SERVER_NAME,
     metrics: tabs?.pvp?.metrics || [],
@@ -620,25 +683,7 @@ app.get('/api/data', async (req, res) => {
       return res.status(500).json({ error: err.message || 'Failed to refresh' });
     }
   }
-  const fallbackProfiles = players.map((player) => ({
-    steamUrl: player.steamUrl,
-    steamId: player.steamId,
-    displayName: player.displayName || player.steamId || player.steamUrl,
-    fallbackName: player.displayName || player.steamId || player.steamUrl,
-    avatarUrl: player.avatarUrl || FALLBACK_AVATAR,
-    missing: false,
-  }));
-  res.json({
-    serverName,
-    metrics: [],
-    stats: {},
-    profiles: attachPlayerIds(fallbackProfiles, players),
-    tabs: {},
-    missing: [],
-    serverInfo: null,
-    updatedAt: null,
-    cached: false,
-  });
+  res.json(buildFallbackResponse(serverName, players));
 });
 
 app.get('/api/refresh-status', (req, res) => {

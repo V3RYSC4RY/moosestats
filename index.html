@@ -1831,7 +1831,13 @@
               <img class="avatar" src="${p.avatarUrl || FALLBACK_AVATAR}" alt="${p.displayName || p.fallbackName} avatar" />
               <div class="player-meta">
                 <span class="player-name" style="color:${colorMap[p.displayName || p.fallbackName] || p.color || '#66c0f4'}">${p.displayName || p.fallbackName}</span>
-                ${p.missing === true ? '<span class="player-missing">Missing on server</span>' : ''}
+                ${
+                  p.needsSteam64
+                    ? '<span class="player-missing">Add Steam64 ID</span>'
+                    : p.missing === true
+                    ? '<span class="player-missing">Missing on server</span>'
+                    : ''
+                }
               </div>
             </a>
             <button class="player-toggle" title="Edit player"><span>▾</span></button>
@@ -2181,6 +2187,10 @@
               avatarUrl: p.avatarUrl || FALLBACK_AVATAR,
               color: '#66c0f4',
               missing: true,
+              needsSteam64: !!(
+                (!p.steamId || !/^\d{17}$/.test(p.steamId)) &&
+                (p.steamId || /steamcommunity\.com\/id\/[^/]+/i.test(p.steamUrl || ''))
+              ),
               playerId: p.id,
               storedSteamUrl: p.steamUrl,
               storedSteamId: p.steamId,
@@ -2238,6 +2248,10 @@
               avatarUrl: p.avatarUrl || FALLBACK_AVATAR,
               color: '#66c0f4',
               missing: true,
+              needsSteam64: !!(
+                (!p.steamId || !/^\d{17}$/.test(p.steamId)) &&
+                (p.steamId || /steamcommunity\.com\/id\/[^/]+/i.test(p.steamUrl || ''))
+              ),
               playerId: p.id,
               storedSteamUrl: p.steamUrl,
               storedSteamId: p.steamId,
