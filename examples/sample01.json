@@ -1,0 +1,870 @@
+{
+  "servers": {
+    "US Monthly (Premium)": {
+      "serverName": "US Monthly (Premium)",
+      "profiles": [
+        {
+          "steamUrl": "https://steamcommunity.com/profiles/76561197964311200",
+          "steamId": "76561197964311200",
+          "displayName": "Eziion",
+          "avatarUrl": "https://avatars.fastly.steamstatic.com/7e1e4d943a45ca494d54bd7668f48b62b9b32ff1_full.jpg",
+          "color": "#aea091",
+          "fallbackName": "Eziion",
+          "searchKey": "76561197964311200",
+          "missing": true,
+          "playerId": 0,
+          "storedSteamUrl": "https://steamcommunity.com/profiles/76561197964311200",
+          "storedSteamId": "76561197964311200"
+        },
+        {
+          "steamUrl": "https://steamcommunity.com/profiles/76561198836358057",
+          "steamId": "76561198836358057",
+          "displayName": "TIMO",
+          "avatarUrl": "https://avatars.fastly.steamstatic.com/1dcdec403415eefe402fac1b64ca79dc2f2bb502_full.jpg",
+          "color": "#8e8678",
+          "fallbackName": "TIMO",
+          "searchKey": "76561198836358057",
+          "missing": false,
+          "playerId": 1,
+          "storedSteamUrl": "https://steamcommunity.com/profiles/76561198836358057",
+          "storedSteamId": "76561198836358057"
+        },
+        {
+          "steamUrl": "https://steamcommunity.com/profiles/76561198052323120",
+          "steamId": "76561198052323120",
+          "displayName": "zepplinpimp (The engineer)",
+          "avatarUrl": "https://avatars.fastly.steamstatic.com/4ea3dc211d13add731d66d25572fd3f53bd7ef80_full.jpg",
+          "color": "#6b4f34",
+          "fallbackName": "zepplinpimp (The engineer)",
+          "searchKey": "76561198052323120",
+          "missing": true,
+          "playerId": 2,
+          "storedSteamUrl": "https://steamcommunity.com/profiles/76561198052323120",
+          "storedSteamId": "76561198052323120"
+        },
+        {
+          "steamUrl": "https://steamcommunity.com/profiles/76561198869083727",
+          "steamId": "76561198869083727",
+          "displayName": "Sil",
+          "avatarUrl": "https://avatars.fastly.steamstatic.com/a912ed8af85e1290d72c7d567a1a1ad7ea3160fe_full.jpg",
+          "color": "#9a8d6a",
+          "fallbackName": "Sil",
+          "searchKey": "76561198869083727",
+          "missing": true,
+          "playerId": 3,
+          "storedSteamUrl": "https://steamcommunity.com/profiles/76561198869083727",
+          "storedSteamId": "76561198869083727"
+        },
+        {
+          "steamUrl": "https://steamcommunity.com/profiles/76561198828968059",
+          "steamId": "76561198828968059",
+          "displayName": "@bandit beans",
+          "avatarUrl": "https://avatars.fastly.steamstatic.com/9f37aeb8a2786c3c91ece677fad39430d29cc96c_full.jpg",
+          "color": "#3a2420",
+          "fallbackName": "@bandit beans",
+          "searchKey": "76561198828968059",
+          "missing": true,
+          "playerId": 4,
+          "storedSteamUrl": "https://steamcommunity.com/profiles/76561198828968059",
+          "storedSteamId": "76561198828968059"
+        },
+        {
+          "steamUrl": "https://steamcommunity.com/id/VeryScary",
+          "steamId": "76561198062944336",
+          "displayName": "Spontaneous Menstruation",
+          "avatarUrl": "https://avatars.fastly.steamstatic.com/3d2fd909cc3de7f1ab64094c6d47f8ece587ebc9_full.jpg",
+          "color": "#a48d7e",
+          "fallbackName": "Spontaneous Menstruation",
+          "searchKey": "76561198062944336",
+          "missing": true,
+          "playerId": 5,
+          "storedSteamUrl": "https://steamcommunity.com/id/VeryScary",
+          "storedSteamId": "76561198062944336"
+        }
+      ],
+      "tabs": {
+        "pvp": {
+          "metrics": [
+            "KDR",
+            "PvP Kills",
+            "PvP Deaths",
+            "Suicides",
+            "Shots Fired",
+            "Shots Hit",
+            "Headshots",
+            "Headshot %"
+          ],
+          "stats": {
+            "TIMO": {
+              "KDR": 0.77,
+              "PvP Kills": 89,
+              "PvP Deaths": 116,
+              "Suicides": 28,
+              "Shots Fired": 1394,
+              "Shots Hit": 411,
+              "Headshots": 60,
+              "Headshot %": 14.6
+            }
+          },
+          "columnMap": {
+            "KDR": 1,
+            "PvP Kills": 2,
+            "PvP Deaths": 3,
+            "Suicides": 4,
+            "Shots Fired": 10,
+            "Shots Hit": 11,
+            "Headshots": 12
+          }
+        },
+        "pve": {
+          "metrics": [
+            "Scientist",
+            "Tunnel Dweller",
+            "Bear",
+            "Polar Bear",
+            "Boar",
+            "Wolf",
+            "Stag",
+            "Shark",
+            "Crocodile",
+            "Tiger",
+            "Panther",
+            "Snake",
+            "Bradley APC"
+          ],
+          "stats": {
+            "TIMO": {
+              "Scientist": 5,
+              "Tunnel Dweller": 0,
+              "Bear": 0,
+              "Polar Bear": 4,
+              "Boar": 3,
+              "Wolf": 1,
+              "Stag": 0,
+              "Shark": 0,
+              "Crocodile": 0,
+              "Tiger": 0,
+              "Panther": 0,
+              "Snake": 0,
+              "Bradley APC": 0
+            }
+          },
+          "columnMap": {
+            "Scientist": 1,
+            "Tunnel Dweller": 2,
+            "Bear": 3,
+            "Polar Bear": 4,
+            "Boar": 5,
+            "Wolf": 6,
+            "Stag": 7,
+            "Shark": 8,
+            "Crocodile": 9,
+            "Tiger": 10,
+            "Panther": 11,
+            "Snake": 12,
+            "Bradley APC": 13
+          }
+        },
+        "resources": {
+          "metrics": [
+            "Wood",
+            "Stone",
+            "Metal Ore",
+            "Sulfur Ore",
+            "HQM Ore"
+          ],
+          "stats": {
+            "TIMO": {
+              "Wood": 127015,
+              "Stone": 106116,
+              "Metal Ore": 42350,
+              "Sulfur Ore": 31437,
+              "HQM Ore": 140
+            }
+          },
+          "columnMap": {
+            "Wood": 1,
+            "Stone": 2,
+            "Metal Ore": 3,
+            "Sulfur Ore": 4,
+            "HQM Ore": 5
+          }
+        },
+        "farming": {
+          "metrics": [
+            "Cloth",
+            "Animal Fat",
+            "Leather",
+            "Bone Fragments",
+            "Mushroom",
+            "Pumpkin",
+            "Corn",
+            "Wheat",
+            "Potato",
+            "Berry"
+          ],
+          "stats": {
+            "TIMO": {
+              "Cloth": 916,
+              "Animal Fat": 594,
+              "Leather": 585,
+              "Bone Fragments": 834,
+              "Mushroom": 6,
+              "Pumpkin": 0,
+              "Corn": 0,
+              "Wheat": 0,
+              "Potato": 0,
+              "Berry": 0
+            }
+          },
+          "columnMap": {
+            "Cloth": 1,
+            "Animal Fat": 2,
+            "Leather": 3,
+            "Bone Fragments": 4,
+            "Mushroom": 5,
+            "Pumpkin": 6,
+            "Corn": 7,
+            "Wheat": 8,
+            "Potato": 9,
+            "Berry": 10
+          }
+        },
+        "building": {
+          "metrics": [
+            "Blocks Built",
+            "Blocks Upgraded",
+            "Blocks Demolished",
+            "HQM Used",
+            "Metal Used",
+            "Stone Used",
+            "Wood Used"
+          ],
+          "stats": {
+            "TIMO": {
+              "Blocks Built": 433,
+              "Blocks Upgraded": 546,
+              "Blocks Demolished": 49,
+              "HQM Used": 0,
+              "Metal Used": 26910,
+              "Stone Used": 60870,
+              "Wood Used": 13923
+            }
+          },
+          "columnMap": {
+            "Blocks Built": 1,
+            "Blocks Upgraded": 2,
+            "Blocks Demolished": 3,
+            "HQM Used": 4,
+            "Metal Used": 5,
+            "Stone Used": 6,
+            "Wood Used": 7
+          }
+        }
+      },
+      "missing": [
+        {
+          "label": "Eziion",
+          "steamId": "76561197964311200",
+          "steamUrl": "https://steamcommunity.com/profiles/76561197964311200",
+          "reason": "Could not find player row by SteamID/searchKey for Eziion"
+        },
+        {
+          "label": "zepplinpimp (The engineer)",
+          "steamId": "76561198052323120",
+          "steamUrl": "https://steamcommunity.com/profiles/76561198052323120",
+          "reason": "Could not find player row by SteamID/searchKey for zepplinpimp (The engineer)"
+        },
+        {
+          "label": "Sil",
+          "steamId": "76561198869083727",
+          "steamUrl": "https://steamcommunity.com/profiles/76561198869083727",
+          "reason": "Could not find player row by SteamID/searchKey for Sil"
+        },
+        {
+          "label": "@bandit beans",
+          "steamId": "76561198828968059",
+          "steamUrl": "https://steamcommunity.com/profiles/76561198828968059",
+          "reason": "Could not find player row by SteamID/searchKey for @bandit beans"
+        },
+        {
+          "label": "Spontaneous Menstruation",
+          "steamId": "76561198062944336",
+          "steamUrl": "https://steamcommunity.com/id/VeryScary",
+          "reason": "Could not find player row by SteamID/searchKey for Spontaneous Menstruation"
+        }
+      ],
+      "serverInfo": {
+        "selectionLabel": "US Monthly (Premium)",
+        "itemsText": [],
+        "targetFound": true
+      },
+      "updatedAt": 1769058713602
+    },
+    "US Biweekly (Premium)": {
+      "serverName": "US Biweekly (Premium)",
+      "profiles": [
+        {
+          "steamUrl": "https://steamcommunity.com/profiles/76561197964311200",
+          "steamId": "76561197964311200",
+          "displayName": "Eziion",
+          "avatarUrl": "https://avatars.fastly.steamstatic.com/7e1e4d943a45ca494d54bd7668f48b62b9b32ff1_full.jpg",
+          "color": "#aea091",
+          "fallbackName": "Eziion",
+          "searchKey": "76561197964311200",
+          "missing": false,
+          "playerId": 0,
+          "storedSteamUrl": "https://steamcommunity.com/profiles/76561197964311200",
+          "storedSteamId": "76561197964311200"
+        },
+        {
+          "steamUrl": "https://steamcommunity.com/profiles/76561198836358057",
+          "steamId": "76561198836358057",
+          "displayName": "TIMO",
+          "avatarUrl": "https://avatars.fastly.steamstatic.com/1dcdec403415eefe402fac1b64ca79dc2f2bb502_full.jpg",
+          "color": "#8e8678",
+          "fallbackName": "TIMO",
+          "searchKey": "76561198836358057",
+          "missing": false,
+          "playerId": 1,
+          "storedSteamUrl": "https://steamcommunity.com/profiles/76561198836358057",
+          "storedSteamId": "76561198836358057"
+        },
+        {
+          "steamUrl": "https://steamcommunity.com/profiles/76561198052323120",
+          "steamId": "76561198052323120",
+          "displayName": "zepplinpimp (The engineer)",
+          "avatarUrl": "https://avatars.fastly.steamstatic.com/4ea3dc211d13add731d66d25572fd3f53bd7ef80_full.jpg",
+          "color": "#6b4f34",
+          "fallbackName": "zepplinpimp (The engineer)",
+          "searchKey": "76561198052323120",
+          "missing": false,
+          "playerId": 2,
+          "storedSteamUrl": "https://steamcommunity.com/profiles/76561198052323120",
+          "storedSteamId": "76561198052323120"
+        },
+        {
+          "steamUrl": "https://steamcommunity.com/profiles/76561198869083727",
+          "steamId": "76561198869083727",
+          "displayName": "Sil",
+          "avatarUrl": "https://avatars.fastly.steamstatic.com/a912ed8af85e1290d72c7d567a1a1ad7ea3160fe_full.jpg",
+          "color": "#9a8d6a",
+          "fallbackName": "Sil",
+          "searchKey": "76561198869083727",
+          "missing": false,
+          "playerId": 3,
+          "storedSteamUrl": "https://steamcommunity.com/profiles/76561198869083727",
+          "storedSteamId": "76561198869083727"
+        },
+        {
+          "steamUrl": "https://steamcommunity.com/profiles/76561198828968059",
+          "steamId": "76561198828968059",
+          "displayName": "@bandit beans",
+          "avatarUrl": "https://avatars.fastly.steamstatic.com/9f37aeb8a2786c3c91ece677fad39430d29cc96c_full.jpg",
+          "color": "#3a2420",
+          "fallbackName": "@bandit beans",
+          "searchKey": "76561198828968059",
+          "missing": false,
+          "playerId": 4,
+          "storedSteamUrl": "https://steamcommunity.com/profiles/76561198828968059",
+          "storedSteamId": "76561198828968059"
+        },
+        {
+          "steamUrl": "https://steamcommunity.com/id/VeryScary",
+          "steamId": "76561198062944336",
+          "displayName": "Spontaneous Menstruation",
+          "avatarUrl": "https://avatars.fastly.steamstatic.com/3d2fd909cc3de7f1ab64094c6d47f8ece587ebc9_full.jpg",
+          "color": "#a48d7e",
+          "fallbackName": "Spontaneous Menstruation",
+          "searchKey": "76561198062944336",
+          "missing": false,
+          "playerId": 5,
+          "storedSteamUrl": "https://steamcommunity.com/id/VeryScary",
+          "storedSteamId": "76561198062944336"
+        },
+        {
+          "steamUrl": "https://steamcommunity.com/profiles/76561198048364720/",
+          "steamId": "76561198048364720",
+          "displayName": "victor",
+          "avatarUrl": "https://avatars.fastly.steamstatic.com/fab32d5d7261d73e15dc105bc704823f92b15c38_full.jpg",
+          "color": "#fd131b",
+          "fallbackName": "victor",
+          "searchKey": "76561198048364720",
+          "missing": false
+        }
+      ],
+      "tabs": {
+        "pvp": {
+          "metrics": [
+            "KDR",
+            "PvP Kills",
+            "PvP Deaths",
+            "Suicides",
+            "Shots Fired",
+            "Shots Hit",
+            "Headshots",
+            "Headshot %"
+          ],
+          "stats": {
+            "Eziion": {
+              "KDR": 1.25,
+              "PvP Kills": 30,
+              "PvP Deaths": 24,
+              "Suicides": 3,
+              "Shots Fired": 1085,
+              "Shots Hit": 283,
+              "Headshots": 66,
+              "Headshot %": 23.32
+            },
+            "TIMO": {
+              "KDR": 1.06,
+              "PvP Kills": 69,
+              "PvP Deaths": 65,
+              "Suicides": 11,
+              "Shots Fired": 1364,
+              "Shots Hit": 477,
+              "Headshots": 166,
+              "Headshot %": 34.8
+            },
+            "zepplinpimp (The engineer)": {
+              "KDR": 0.16,
+              "PvP Kills": 8,
+              "PvP Deaths": 49,
+              "Suicides": 9,
+              "Shots Fired": 187,
+              "Shots Hit": 33,
+              "Headshots": 17,
+              "Headshot %": 51.52
+            },
+            "Sil": {
+              "KDR": 0.47,
+              "PvP Kills": 18,
+              "PvP Deaths": 38,
+              "Suicides": 7,
+              "Shots Fired": 408,
+              "Shots Hit": 121,
+              "Headshots": 29,
+              "Headshot %": 23.97
+            },
+            "@bandit beans": {
+              "KDR": 0.27,
+              "PvP Kills": 12,
+              "PvP Deaths": 45,
+              "Suicides": 6,
+              "Shots Fired": 756,
+              "Shots Hit": 235,
+              "Headshots": 104,
+              "Headshot %": 44.26
+            },
+            "Spontaneous Menstruation": {
+              "KDR": 1.2,
+              "PvP Kills": 18,
+              "PvP Deaths": 15,
+              "Suicides": 6,
+              "Shots Fired": 828,
+              "Shots Hit": 403,
+              "Headshots": 170,
+              "Headshot %": 42.18
+            },
+            "victor": {
+              "KDR": 0,
+              "PvP Kills": 0,
+              "PvP Deaths": 2,
+              "Suicides": 0,
+              "Shots Fired": 0,
+              "Shots Hit": 0,
+              "Headshots": 0,
+              "Headshot %": 0
+            }
+          },
+          "columnMap": {
+            "KDR": 1,
+            "PvP Kills": 2,
+            "PvP Deaths": 3,
+            "Suicides": 4,
+            "Shots Fired": 10,
+            "Shots Hit": 11,
+            "Headshots": 12
+          }
+        },
+        "pve": {
+          "metrics": [
+            "Scientist",
+            "Tunnel Dweller",
+            "Bear",
+            "Polar Bear",
+            "Boar",
+            "Wolf",
+            "Stag",
+            "Shark",
+            "Crocodile",
+            "Tiger",
+            "Panther",
+            "Snake",
+            "Bradley APC"
+          ],
+          "stats": {
+            "Eziion": {
+              "Scientist": 0,
+              "Tunnel Dweller": 38,
+              "Bear": 4,
+              "Polar Bear": 0,
+              "Boar": 5,
+              "Wolf": 12,
+              "Stag": 1,
+              "Shark": 0,
+              "Crocodile": 0,
+              "Tiger": 0,
+              "Panther": 0,
+              "Snake": 0,
+              "Bradley APC": 0
+            },
+            "TIMO": {
+              "Scientist": 4,
+              "Tunnel Dweller": 62,
+              "Bear": 5,
+              "Polar Bear": 1,
+              "Boar": 4,
+              "Wolf": 13,
+              "Stag": 4,
+              "Shark": 0,
+              "Crocodile": 0,
+              "Tiger": 0,
+              "Panther": 0,
+              "Snake": 0,
+              "Bradley APC": 0
+            },
+            "zepplinpimp (The engineer)": {
+              "Scientist": 0,
+              "Tunnel Dweller": 4,
+              "Bear": 1,
+              "Polar Bear": 0,
+              "Boar": 0,
+              "Wolf": 3,
+              "Stag": 0,
+              "Shark": 0,
+              "Crocodile": 0,
+              "Tiger": 0,
+              "Panther": 0,
+              "Snake": 0,
+              "Bradley APC": 0
+            },
+            "Sil": {
+              "Scientist": 0,
+              "Tunnel Dweller": 24,
+              "Bear": 1,
+              "Polar Bear": 0,
+              "Boar": 0,
+              "Wolf": 1,
+              "Stag": 0,
+              "Shark": 0,
+              "Crocodile": 0,
+              "Tiger": 0,
+              "Panther": 0,
+              "Snake": 0,
+              "Bradley APC": 0
+            },
+            "@bandit beans": {
+              "Scientist": 0,
+              "Tunnel Dweller": 54,
+              "Bear": 5,
+              "Polar Bear": 0,
+              "Boar": 1,
+              "Wolf": 3,
+              "Stag": 0,
+              "Shark": 0,
+              "Crocodile": 0,
+              "Tiger": 0,
+              "Panther": 0,
+              "Snake": 0,
+              "Bradley APC": 0
+            },
+            "Spontaneous Menstruation": {
+              "Scientist": 0,
+              "Tunnel Dweller": 90,
+              "Bear": 1,
+              "Polar Bear": 0,
+              "Boar": 0,
+              "Wolf": 3,
+              "Stag": 0,
+              "Shark": 0,
+              "Crocodile": 0,
+              "Tiger": 0,
+              "Panther": 0,
+              "Snake": 0,
+              "Bradley APC": 0
+            }
+          },
+          "columnMap": {
+            "Scientist": 1,
+            "Tunnel Dweller": 2,
+            "Bear": 3,
+            "Polar Bear": 4,
+            "Boar": 5,
+            "Wolf": 6,
+            "Stag": 7,
+            "Shark": 8,
+            "Crocodile": 9,
+            "Tiger": 10,
+            "Panther": 11,
+            "Snake": 12,
+            "Bradley APC": 13
+          }
+        },
+        "resources": {
+          "metrics": [
+            "Wood",
+            "Stone",
+            "Metal Ore",
+            "Sulfur Ore",
+            "HQM Ore"
+          ],
+          "stats": {
+            "Eziion": {
+              "Wood": 39709,
+              "Stone": 50838,
+              "Metal Ore": 38694,
+              "Sulfur Ore": 14340,
+              "HQM Ore": 128
+            },
+            "TIMO": {
+              "Wood": 78857,
+              "Stone": 37981,
+              "Metal Ore": 8700,
+              "Sulfur Ore": 5170,
+              "HQM Ore": 28
+            },
+            "zepplinpimp (The engineer)": {
+              "Wood": 20849,
+              "Stone": 38660,
+              "Metal Ore": 4801,
+              "Sulfur Ore": 850,
+              "HQM Ore": 14
+            },
+            "Sil": {
+              "Wood": 83201,
+              "Stone": 23550,
+              "Metal Ore": 6600,
+              "Sulfur Ore": 5350,
+              "HQM Ore": 20
+            },
+            "@bandit beans": {
+              "Wood": 46691,
+              "Stone": 116130,
+              "Metal Ore": 101639,
+              "Sulfur Ore": 53632,
+              "HQM Ore": 332
+            },
+            "Spontaneous Menstruation": {
+              "Wood": 29823,
+              "Stone": 21050,
+              "Metal Ore": 9643,
+              "Sulfur Ore": 4146,
+              "HQM Ore": 32
+            },
+            "victor": {
+              "Wood": 576,
+              "Stone": 155,
+              "Metal Ore": 0,
+              "Sulfur Ore": 0,
+              "HQM Ore": 0
+            }
+          },
+          "columnMap": {
+            "Wood": 1,
+            "Stone": 2,
+            "Metal Ore": 3,
+            "Sulfur Ore": 4,
+            "HQM Ore": 5
+          }
+        },
+        "farming": {
+          "metrics": [
+            "Cloth",
+            "Animal Fat",
+            "Leather",
+            "Bone Fragments",
+            "Mushroom",
+            "Pumpkin",
+            "Corn",
+            "Wheat",
+            "Potato",
+            "Berry"
+          ],
+          "stats": {
+            "Eziion": {
+              "Cloth": 1928,
+              "Animal Fat": 382,
+              "Leather": 470,
+              "Bone Fragments": 590,
+              "Mushroom": 0,
+              "Pumpkin": 1,
+              "Corn": 1,
+              "Wheat": 0,
+              "Potato": 0,
+              "Berry": 1
+            },
+            "TIMO": {
+              "Cloth": 2896,
+              "Animal Fat": 510,
+              "Leather": 810,
+              "Bone Fragments": 988,
+              "Mushroom": 32,
+              "Pumpkin": 5,
+              "Corn": 6,
+              "Wheat": 0,
+              "Potato": 0,
+              "Berry": 17
+            },
+            "zepplinpimp (The engineer)": {
+              "Cloth": 1042,
+              "Animal Fat": 130,
+              "Leather": 325,
+              "Bone Fragments": 272,
+              "Mushroom": 0,
+              "Pumpkin": 8,
+              "Corn": 2,
+              "Wheat": 0,
+              "Potato": 0,
+              "Berry": 9
+            },
+            "Sil": {
+              "Cloth": 2115,
+              "Animal Fat": 44,
+              "Leather": 100,
+              "Bone Fragments": 120,
+              "Mushroom": 4,
+              "Pumpkin": 0,
+              "Corn": 2,
+              "Wheat": 0,
+              "Potato": 0,
+              "Berry": 0
+            },
+            "@bandit beans": {
+              "Cloth": 9177,
+              "Animal Fat": 585,
+              "Leather": 813,
+              "Bone Fragments": 964,
+              "Mushroom": 19,
+              "Pumpkin": 4,
+              "Corn": 7,
+              "Wheat": 0,
+              "Potato": 0,
+              "Berry": 33
+            },
+            "Spontaneous Menstruation": {
+              "Cloth": 1800,
+              "Animal Fat": 207,
+              "Leather": 200,
+              "Bone Fragments": 338,
+              "Mushroom": 24,
+              "Pumpkin": 0,
+              "Corn": 1,
+              "Wheat": 1,
+              "Potato": 0,
+              "Berry": 0
+            },
+            "victor": {
+              "Cloth": 164,
+              "Animal Fat": 0,
+              "Leather": 0,
+              "Bone Fragments": 0,
+              "Mushroom": 5,
+              "Pumpkin": 2,
+              "Corn": 3,
+              "Wheat": 0,
+              "Potato": 0,
+              "Berry": 0
+            }
+          },
+          "columnMap": {
+            "Cloth": 1,
+            "Animal Fat": 2,
+            "Leather": 3,
+            "Bone Fragments": 4,
+            "Mushroom": 5,
+            "Pumpkin": 6,
+            "Corn": 7,
+            "Wheat": 8,
+            "Potato": 9,
+            "Berry": 10
+          }
+        },
+        "building": {
+          "metrics": [
+            "Blocks Built",
+            "Blocks Upgraded",
+            "Blocks Demolished",
+            "HQM Used",
+            "Metal Used",
+            "Stone Used",
+            "Wood Used"
+          ],
+          "stats": {
+            "Eziion": {
+              "Blocks Built": 139,
+              "Blocks Upgraded": 325,
+              "Blocks Demolished": 23,
+              "HQM Used": 0,
+              "Metal Used": 27690,
+              "Stone Used": 18195,
+              "Wood Used": 4943
+            },
+            "TIMO": {
+              "Blocks Built": 35,
+              "Blocks Upgraded": 19,
+              "Blocks Demolished": 0,
+              "HQM Used": 0,
+              "Metal Used": 0,
+              "Stone Used": 4425,
+              "Wood Used": 946
+            },
+            "zepplinpimp (The engineer)": {
+              "Blocks Built": 1215,
+              "Blocks Upgraded": 817,
+              "Blocks Demolished": 362,
+              "HQM Used": 0,
+              "Metal Used": 7980,
+              "Stone Used": 140670,
+              "Wood Used": 38601
+            },
+            "Sil": {
+              "Blocks Built": 174,
+              "Blocks Upgraded": 117,
+              "Blocks Demolished": 50,
+              "HQM Used": 0,
+              "Metal Used": 0,
+              "Stone Used": 24510,
+              "Wood Used": 5990
+            },
+            "@bandit beans": {
+              "Blocks Built": 54,
+              "Blocks Upgraded": 51,
+              "Blocks Demolished": 5,
+              "HQM Used": 0,
+              "Metal Used": 0,
+              "Stone Used": 11250,
+              "Wood Used": 1951
+            }
+          },
+          "columnMap": {
+            "Blocks Built": 1,
+            "Blocks Upgraded": 2,
+            "Blocks Demolished": 3,
+            "HQM Used": 4,
+            "Metal Used": 5,
+            "Stone Used": 6,
+            "Wood Used": 7
+          }
+        }
+      },
+      "missing": [],
+      "serverInfo": {
+        "selectionLabel": "US Biweekly (Premium)",
+        "itemsText": [],
+        "targetFound": true
+      },
+      "updatedAt": 1769058739930
+    }
+  }
+}
