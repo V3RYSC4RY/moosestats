@@ -20,7 +20,19 @@
       gap: 12px;
       margin: 12px 0 12px;
     }
+    .title-row__left {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      min-width: 0;
+    }
     .title-row h1 { margin: 0; }
+    .wipe-range {
+      font-size: 12px;
+      letter-spacing: 0.3px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
     .title-row__right {
       display: flex;
       align-items: center;
@@ -275,6 +287,37 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
+    }
+    .stat-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .stat-group-title {
+      font-size: 13px;
+      letter-spacing: 0.3px;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+    .stat-group-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 6px 12px;
+    }
+    .stat-group-item {
+      display: grid;
+      grid-template-columns: 48px 1fr auto;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      padding: 4px 6px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
     }
 
     .stat-row {
@@ -656,21 +699,81 @@
       border-color: rgba(102, 192, 244, 0.6);
     }
 
-    .color-toggle {
-      position: fixed;
-      right: 18px;
-      bottom: 18px;
+    .chart-actions-left {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      z-index: 6;
       display: flex;
-      gap: 6px;
-      padding: 8px;
-      background: rgba(8, 13, 18, 0.7);
+      align-items: center;
+    }
+
+    .chart-settings {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      z-index: 6;
+      display: flex;
+      align-items: flex-end;
+    }
+
+    .settings-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: rgba(12, 20, 28, 0.85);
+      color: var(--text-primary);
+      border: 1px solid rgba(255,255,255,0.12);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .settings-btn:hover {
+      box-shadow: 0 0 16px rgba(102, 192, 244, 0.35);
+      border-color: rgba(102, 192, 244, 0.6);
+    }
+
+    .settings-panel {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      padding: 10px;
+      align-items: flex-start;
+      background: rgba(8, 13, 18, 0.85);
       border: 1px solid rgba(102, 192, 244, 0.25);
       border-radius: 10px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.35);
-      z-index: 9998;
     }
 
-    .color-toggle button {
+    .settings-panel.show {
+      display: flex;
+    }
+
+    .toggle-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .toggle-label {
+      font-size: 10px;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-right: 6px;
+      min-width: 44px;
+      text-align: left;
+    }
+
+    .settings-panel button {
       background: rgba(255,255,255,0.08);
       color: var(--text-primary);
       border: 1px solid rgba(255,255,255,0.12);
@@ -681,7 +784,7 @@
       cursor: pointer;
     }
 
-    .color-toggle button.active {
+    .settings-panel button.active {
       background: var(--steam-accent);
       color: #04101a;
       border-color: transparent;
@@ -760,7 +863,10 @@
     </div>
     <div class="panel">
       <div class="title-row">
-        <h1 id="title">Rusty Moose Stats Chart</h1>
+        <div class="title-row__left">
+          <h1 id="title">Rusty Moose Stats Chart</h1>
+          <span id="wipeRange" class="wipe-range"></span>
+        </div>
         <div class="title-row__right">
           <div class="tab-bar" id="statTabs">
             <button class="tab-btn" data-tab="pvp">PvP</button>
@@ -781,7 +887,7 @@
       <h2 id="subtitle"></h2>
 
     <div class="stats-header">
-      <button id="refresh" class="btn-icon primary" title="Refresh">↻</button>
+      <button id="refresh" class="btn-icon primary" title="Refresh">&#x21bb;</button>
       <div class="stats-header__players" id="players"></div>
       <button id="add" class="btn-icon" title="Add player">+</button>
     </div>
@@ -789,20 +895,49 @@
     <div class="stats-chart-container">
       <div id="statHeaderOverlay" class="stat-header-overlay"></div>
       <canvas id="statsChart"></canvas>
+      <div class="chart-actions-left">
+        <button id="exportSnapshot" class="settings-btn" title="Save snapshot" aria-label="Save snapshot">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path
+              d="M5 3h12l4 4v14H3V5a2 2 0 0 1 2-2zm8 2H7v6h6V5zm2 0v8H5V5h10zm3 10H6v4h12v-4z"
+              fill="currentColor"
+            />
+          </svg>
+        </button>
+      </div>
+      <div class="chart-settings">
+        <button id="settingsToggle" class="settings-btn" title="View settings" aria-label="View settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path
+              d="M12 5C6.5 5 2.1 8.3 1 12c1.1 3.7 5.5 7 11 7s9.9-3.3 11-7c-1.1-3.7-5.5-7-11-7zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"
+              fill="currentColor"
+            />
+            <circle cx="12" cy="12" r="2.2" fill="currentColor" />
+          </svg>
+        </button>
+        <div id="colorModeToggle" class="settings-panel">
+          <div class="toggle-row" aria-label="Color mode">
+            <span class="toggle-label">Color</span>
+            <button type="button" data-mode="original">Auto</button>
+            <button type="button" data-mode="contrast">Contrast</button>
+          </div>
+          <div class="toggle-row" aria-label="Scale mode" id="scaleModeToggle">
+            <span class="toggle-label">Scale</span>
+            <button type="button" data-scale="log">Auto</button>
+            <button type="button" data-scale="sqrt">True</button>
+          </div>
+        </div>
+      </div>
     </div>
     <div id="statDetails" class="stat-details" style="display:none;">
-      <button class="panel-close" id="statDetailsClose" title="Close details"><span>×</span></button>
+      <button class="panel-close" id="statDetailsClose" title="Close details"><span>&times;</span></button>
       <h3 id="statDetailsTitle">Stat</h3>
       <div id="statDetailsList" class="stat-list"></div>
     </div>
   </div>
-  <div id="colorModeToggle" class="color-toggle">
-    <button type="button" data-mode="original">Original</button>
-    <button type="button" data-mode="contrast">Contrast</button>
-  </div>
   <div id="teamModal" class="modal-overlay" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="teamModalTitle">
-      <button id="teamModalClose" class="modal-close" title="Close"><span>×</span></button>
+      <button id="teamModalClose" class="modal-close" title="Close"><span>&times;</span></button>
       <h3 id="teamModalTitle" class="modal-title">Add Team</h3>
       <div class="modal-body">
         <label class="modal-label" for="teamCsvInput">Steam name, Steam URL (CSV pairs)</label>
@@ -822,8 +957,14 @@
     const tabBar = document.getElementById('statTabs');
     const FALLBACK_AVATAR =
       'https://steamcommunity-a.akamaihd.net/public/shared/images/responsive/share_steam_logo.png';
+    const settingsToggle = document.getElementById('settingsToggle');
     const colorToggle = document.getElementById('colorModeToggle');
+    const scaleToggle = document.getElementById('scaleModeToggle');
+    const exportData = window.__EXPORT_DATA__ || null;
+    const exportMode = !!exportData;
     let colorMode = localStorage.getItem('mooseColorMode') || 'original';
+    let scaleMode = localStorage.getItem('mooseScaleMode') || 'log';
+    if (!['sqrt', 'log'].includes(scaleMode)) scaleMode = 'log';
     let contrastColorCache = (() => {
       try {
         return JSON.parse(localStorage.getItem('mooseContrastColors') || '{}');
@@ -845,6 +986,11 @@
     let hoverFromKey = null;
     let hoverToKey = null;
     let draggingCard = null;
+    if (exportMode) {
+      if (window.__EXPORT_TAB__) currentTab = window.__EXPORT_TAB__;
+      if (window.__EXPORT_COLOR__) colorMode = window.__EXPORT_COLOR__;
+      if (window.__EXPORT_SCALE__) scaleMode = window.__EXPORT_SCALE__;
+    }
 
     function getProfileKey(profile) {
       if (!profile) return null;
@@ -924,6 +1070,13 @@
       return Number.isInteger(n) ? n.toString() : n.toFixed(2);
     }
 
+    function getScaledValue(value) {
+      if (!Number.isFinite(value)) return 0;
+      if (scaleMode === 'sqrt') return Math.sqrt(Math.max(0, value));
+      if (scaleMode === 'log') return Math.max(0, value);
+      return value;
+    }
+
     function ensureTooltipEl() {
       let el = document.getElementById('chartjs-external-tooltip');
       if (!el) {
@@ -941,6 +1094,63 @@
       const titleEl = document.getElementById('title');
       if (titleEl) titleEl.textContent = 'Rusty Moose Stats Chart';
       document.title = 'Rusty Moose Stats Chart';
+    }
+
+    function formatShortDate(date) {
+      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
+
+    function formatLongDate(date) {
+      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function getFirstWeekdayOfMonth(year, month, weekday) {
+      const first = new Date(year, month, 1);
+      const offset = (weekday - first.getDay() + 7) % 7;
+      return new Date(year, month, 1 + offset);
+    }
+
+    function getWipeRange(serverName, now = new Date()) {
+      const dayMs = 24 * 60 * 60 * 1000;
+      const year = now.getFullYear();
+      const month = now.getMonth();
+      const firstThursday = getFirstWeekdayOfMonth(year, month, 4);
+      if (/biweekly/i.test(serverName)) {
+        let start = firstThursday;
+        if (now < start) {
+          const prev = new Date(year, month - 1, 1);
+          start = getFirstWeekdayOfMonth(prev.getFullYear(), prev.getMonth(), 4);
+        }
+        const diffDays = Math.floor((now - start) / dayMs);
+        const block = Math.floor(diffDays / 14);
+        const periodStart = new Date(start.getTime() + block * 14 * dayMs);
+        const periodEnd = new Date(periodStart.getTime() + 14 * dayMs);
+        return { start: periodStart, end: periodEnd };
+      }
+      if (now < firstThursday) {
+        const prev = new Date(year, month - 1, 1);
+        const prevFirstThursday = getFirstWeekdayOfMonth(prev.getFullYear(), prev.getMonth(), 4);
+        return { start: prevFirstThursday, end: firstThursday };
+      }
+      const nextMonth = new Date(year, month + 1, 1);
+      const firstThursdayNext = getFirstWeekdayOfMonth(nextMonth.getFullYear(), nextMonth.getMonth(), 4);
+      return { start: firstThursday, end: firstThursdayNext };
+    }
+
+    function formatWipeRangeLabel(serverName) {
+      const { start, end } = getWipeRange(serverName);
+      if (!start || !end) return '';
+      const sameYear = start.getFullYear() === end.getFullYear();
+      const startText = sameYear ? formatShortDate(start) : formatLongDate(start);
+      const endText = formatLongDate(end);
+      return `Wipe: ${startText} - ${endText}`;
+    }
+
+    function updateWipeRange() {
+      const wipeEl = document.getElementById('wipeRange');
+      if (!wipeEl) return;
+      const serverName = serverSelect ? serverSelect.value : window.__EXPORT_SERVER__ || '';
+      wipeEl.textContent = serverName ? formatWipeRangeLabel(serverName) : '';
     }
 
     function updateTabButtons() {
@@ -1115,7 +1325,8 @@
       const title = document.getElementById('statDetailsTitle');
       const list = document.getElementById('statDetailsList');
       if (!panel || !title || !list || !metric || !data) return;
-      title.textContent = metric;
+      const allMetrics = (data.metrics || []).slice();
+      title.textContent = exportMode ? 'All Categories' : metric;
       const toOrdinal = (n) => {
         const mod100 = n % 100;
         if (mod100 >= 11 && mod100 <= 13) return `${n}th`;
@@ -1130,6 +1341,55 @@
             return `${n}th`;
         }
       };
+      if (exportMode) {
+        const groups = allMetrics
+          .map((metricLabel) => {
+            const rows = (data.profiles || [])
+              .map((p) => {
+                const key = p.steamId || p.displayName || p.fallbackName;
+                const raw = data.stats && data.stats[key] ? data.stats[key][metricLabel] : 0;
+                const value = metricLabel === 'Headshot %' ? Math.round(raw) : raw;
+                return { key, value, profile: p };
+              })
+              .sort((a, b) => b.value - a.value)
+              .map((item, index) => {
+                const displayName = item.profile.displayName || item.profile.fallbackName || item.key;
+                const color = colorMap[displayName] || colorMap[item.key] || item.profile.color || '#66c0f4';
+                const rank = index + 1;
+                const rankColor =
+                  rank === 1 ? '#d4af37' : rank === 2 ? '#c0c0c0' : rank === 3 ? '#cd7f32' : '#ffffff';
+                const displayValue =
+                  metricLabel === 'Headshot %'
+                    ? `${formatNumber(item.value ?? 0)}%`
+                    : formatNumber(item.value ?? 0);
+                const rankClass = rank <= 3 ? `rankBadge rank${rank}` : 'stat-rank';
+                const rankLabel = toOrdinal(rank);
+                return `
+                  <div class="stat-group-item" style="border-left: 3px solid ${color};">
+                    <span class="${rankClass}" style="color:${rankColor}">${rankLabel}${
+                  rank <= 3 ? '<span class="milling"></span>' : ''
+                }</span>
+                    <span class="stat-name" style="color:${color}">${displayName}</span>
+                    <strong class="stat-value" style="color:${color}">${displayValue}</strong>
+                  </div>
+                `;
+              })
+              .join('');
+            return `
+              <div class="stat-group">
+                <div class="stat-group-title">${metricLabel}</div>
+                <div class="stat-group-list">
+                  ${rows}
+                </div>
+              </div>
+            `;
+          })
+          .join('');
+        list.innerHTML = groups;
+        panel.style.display = 'block';
+        return;
+      }
+
       const rows = (data.profiles || [])
         .map((p) => {
           const key = p.steamId || p.displayName || p.fallbackName;
@@ -1139,9 +1399,11 @@
         })
         .sort((a, b) => b.value - a.value)
         .map((item, index) => {
-          const color = colorMap[item.key] || item.profile.color || '#66c0f4';
+          const displayName = item.profile.displayName || item.profile.fallbackName || item.key;
+          const color = colorMap[displayName] || colorMap[item.key] || item.profile.color || '#66c0f4';
           const rank = index + 1;
-          const rankColor = rank === 1 ? '#d4af37' : rank === 2 ? '#c0c0c0' : rank === 3 ? '#cd7f32' : '#ffffff';
+          const rankColor =
+            rank === 1 ? '#d4af37' : rank === 2 ? '#c0c0c0' : rank === 3 ? '#cd7f32' : '#ffffff';
           const displayValue =
             metric === 'Headshot %' ? `${formatNumber(item.value ?? 0)}%` : formatNumber(item.value ?? 0);
           const rankClass = rank <= 3 ? `rankBadge rank${rank}` : 'stat-rank';
@@ -1149,7 +1411,7 @@
           return `
             <div class="stat-row rank-${rank}" style="border-left: 3px solid ${color};">
               <span class="${rankClass}" style="color:${rankColor}">${rankLabel}${rank <= 3 ? '<span class="milling"></span>' : ''}</span>
-              <span class="stat-name" style="color:${color}">${item.key}</span>
+              <span class="stat-name" style="color:${color}">${displayName}</span>
               <strong class="stat-value" style="color:${color}">${displayValue}</strong>
             </div>
           `;
@@ -1198,7 +1460,12 @@
           userSelectedMetric = true;
           renderStatHeaderButtons(chartInstance);
           const colorMap = buildColorMap(lastData.profiles || []);
-          const tabPayload = { profiles: lastData.profiles || [], stats: getActiveTabData(lastData).stats || {} };
+          const activeTab = getActiveTabData(lastData);
+          const tabPayload = {
+            profiles: lastData.profiles || [],
+            stats: activeTab.stats || {},
+            metrics: activeTab.metrics || [],
+          };
           renderStatDetails(metric, tabPayload, colorMap);
           chartInstance.update('none');
         });
@@ -1247,13 +1514,18 @@
         chart.resize();
       }
       updateTitle();
+      updateWipeRange();
       const missingCount = (data.missing || []).length;
-      const missingNote = missingCount ? ` • Missing: ${missingCount}` : '';
+      const missingNote = missingCount ? ` - Missing: ${missingCount}` : '';
       const tabLabel = TAB_LABELS[currentTab] || currentTab;
       document.getElementById('subtitle').textContent =
-        data.serverName + ' • ' + tabLabel + ' • ' + (tabData.metrics || []).join(' • ') + missingNote;
+        data.serverName + ' - ' + tabLabel + ' - ' + (tabData.metrics || []).join(' - ') + missingNote;
       if (selectedMetric) {
-        const tabPayload = { profiles: data.profiles || [], stats: tabData.stats || {} };
+        const tabPayload = {
+          profiles: data.profiles || [],
+          stats: tabData.stats || {},
+          metrics: tabData.metrics || [],
+        };
         renderStatDetails(selectedMetric, tabPayload, colorMap);
       }
     }
@@ -1267,7 +1539,8 @@
       }
       const dp = tooltip.dataPoints[0];
       const dataset = chart.data.datasets[dp.datasetIndex];
-      const raw = dp.raw && typeof dp.raw.y === 'number' ? dp.raw.y : dp.parsed.y ?? dp.raw ?? 0;
+      const raw =
+        dp.raw && typeof dp.raw._rawY === 'number' ? dp.raw._rawY : dp.parsed.y ?? dp.raw ?? 0;
       const value = raw;
       const metricLabel = chart.data.labels?.[dp.raw?._metricIndex ?? dp.dataIndex] || '';
       const baseColor = dataset._baseColor || '#66c0f4';
@@ -1415,6 +1688,8 @@
       });
       currentProfiles = activeProfiles;
       let maxValue = 0;
+      let maxDisplayValue = 0;
+      let minPositiveValue = null;
       const labelPaddingTop = 86; // internal top padding for labels + header buttons
       const labelFontSize = 12;
       const labelBaselinePad = -1;
@@ -1435,9 +1710,13 @@
         realValues.forEach((v, idx) => {
           if (typeof v === 'number' && v > maxValue) maxValue = v;
           if (typeof v === 'number' && v > 0) {
+            const displayValue = getScaledValue(v);
+            if (displayValue > maxDisplayValue) maxDisplayValue = displayValue;
+            if (minPositiveValue == null || v < minPositiveValue) minPositiveValue = v;
             dataPoints.push({
               x: idx,
-              y: v,
+              y: scaleMode === 'log' ? v : displayValue,
+              _rawY: v,
               _metricIndex: idx,
               _key: statsKey,
               _datasetIndex: datasetIndex,
@@ -1533,14 +1812,17 @@
       const maxLabelLength = datasets.reduce((maxLen, dataset) => {
         const vals = dataset.data || [];
         const nextMax = vals.reduce((innerMax, entry) => {
-          if (!entry || typeof entry.y !== 'number' || entry.y <= 0) return innerMax;
-          const text = formatNumber(entry.y);
+          if (!entry || typeof entry._rawY !== 'number' || entry._rawY <= 0) return innerMax;
+          const text = formatNumber(entry._rawY);
           return Math.max(innerMax, text.length);
         }, 0);
         return Math.max(maxLen, nextMax);
       }, 0);
       const estimatedLabelWidth = Math.ceil(maxLabelLength * labelFontSize * 0.6);
       const labelRowPadding = Math.max(LABEL_CONFIG.paddingBottomPx, estimatedLabelWidth + labelBaselinePad + 21);
+
+      const logMinValue =
+        scaleMode === 'log' ? (minPositiveValue != null && minPositiveValue < 1 ? minPositiveValue : 0.5) : null;
 
       if (chart) {
         chart.data.labels = metrics;
@@ -1555,6 +1837,12 @@
         chart.$barThickness = baseBarThickness;
         chart.$labelBaselinePad = labelBaselinePad;
         chart.$labelFontSize = labelFontSize;
+        chart.$scaleMode = scaleMode;
+        chart.$displayMax = maxDisplayValue;
+        chart.$displayMin = logMinValue;
+        chart.options.scales.y.type = scaleMode === 'log' ? 'logarithmic' : 'linear';
+        chart.options.scales.y.min =
+          scaleMode === 'log' ? Math.max(logMinValue || 0.1, 1e-6) : 0;
         chart.options.onClick = (event, elements, chartInstance) =>
           handleChartClick(event, chartInstance);
         updateChartHoverStyles();
@@ -1599,7 +1887,7 @@
             const meta = chart.getDatasetMeta(i);
             meta.data.forEach((bar, index) => {
               const raw = dataset.data && dataset.data[index] ? dataset.data[index] : null;
-              const real = raw && typeof raw.y === 'number' ? raw.y : null;
+              const real = raw && typeof raw._rawY === 'number' ? raw._rawY : null;
               if (!real || real <= 0 || !bar) return;
 
               const progress =
@@ -1736,25 +2024,19 @@
               },
         },
             y: {
-              type: 'logarithmic',
-              min: 0.1,
+              type: scaleMode === 'log' ? 'logarithmic' : 'linear',
+              min: scaleMode === 'log' ? Math.max(logMinValue || 0.1, 1e-6) : 0,
               display: false,
               afterDataLimits: (scale) => {
                 const chart = scale.chart;
-                const datasets = chart?.data?.datasets || [];
-                const chartArea = chart?.chartArea;
-                if (!chartArea) return;
-
-                let maxVal = 0;
-                datasets.forEach((ds, datasetIndex) => {
-                  (ds.data || []).forEach((pt) => {
-                    if (!pt || typeof pt.y !== 'number' || pt.y <= 0) return;
-                    if (pt.y > maxVal) maxVal = pt.y;
-                  });
-                });
-                if (!Number.isFinite(maxVal) || maxVal <= 0) return;
+                const maxVal =
+                  Number.isFinite(chart?.$displayMax) && chart.$displayMax > 0 ? chart.$displayMax : 0;
+                if (!maxVal) return;
                 scale.max = maxVal * 1.05;
-                console.log({ maxVal, scaleMax: scale.max, chartTop: chartArea.top });
+                if (chart?.$scaleMode === 'log') {
+                  const minVal = Number.isFinite(chart?.$displayMin) ? chart.$displayMin : 0.1;
+                  scale.min = Math.max(minVal || 0.1, 1e-6);
+                }
               },
               ticks: { callback: () => '' },
               grid: { display: false },
@@ -1785,6 +2067,9 @@
       chart.$barThickness = baseBarThickness;
       chart.$labelBaselinePad = labelBaselinePad;
       chart.$labelFontSize = labelFontSize;
+      chart.$scaleMode = scaleMode;
+      chart.$displayMax = maxDisplayValue;
+      chart.$displayMin = logMinValue;
       renderStatHeaderButtons(chart);
       updateChartHoverStyles();
 
@@ -1904,7 +2189,12 @@
       selectedMetric = labels[index];
       userSelectedMetric = true;
       const colorMap = buildColorMap(lastData.profiles || []);
-      const tabPayload = { profiles: lastData.profiles || [], stats: getActiveTabData(lastData).stats || {} };
+      const activeTab = getActiveTabData(lastData);
+      const tabPayload = {
+        profiles: lastData.profiles || [],
+        stats: activeTab.stats || {},
+        metrics: activeTab.metrics || [],
+      };
       renderStatDetails(selectedMetric, tabPayload, colorMap);
       renderStatHeaderButtons(chartInstance);
       chartInstance.update('none');
@@ -1957,12 +2247,14 @@
     }
 
     function renderPlayers(profiles, colorMap = {}) {
+      const toggleUp = '&#9652;';
+      const toggleDown = '&#9662;';
       const container = document.getElementById('players');
       container.innerHTML = profiles
         .map(
           (p) => `
           <div class="player-card" data-player-id="${p.playerId ?? ''}" data-player-key="${getProfileKey(p) || ''}" data-steamid="${p.steamId || ''}" data-needs-steam64="${p.needsSteam64 ? '1' : '0'}" style="border-color:${hexToRgba(colorMap[p.displayName || p.fallbackName] || p.color || '#66c0f4', 0.35)}; opacity:${p.missing === true ? '0.6' : '1'};">
-            <button class="remove-btn" data-steamid="${p.steamId || ''}" data-steamurl="${p.steamUrl || ''}" title="Remove"><span>×</span></button>
+            <button class="remove-btn" data-steamid="${p.steamId || ''}" data-steamurl="${p.steamUrl || ''}" title="Remove"><span>&times;</span></button>
             <a class="player-link" href="${p.steamUrl}" target="_blank" rel="noopener noreferrer">
               <img class="avatar" src="${p.avatarUrl || FALLBACK_AVATAR}" alt="${p.displayName || p.fallbackName} avatar" />
               <div class="player-meta">
@@ -1976,7 +2268,7 @@
                 }
               </div>
             </a>
-            <button class="player-toggle" title="Edit player"><span>▾</span></button>
+            <button class="player-toggle" title="Edit player"><span>${toggleDown}</span></button>
             <div class="player-panel">
               <div class="player-field">
                 <label>Steam Name</label>
@@ -1992,7 +2284,7 @@
               </div>
               <div class="player-actions">
                 <button class="player-help" title="Lookup SteamID64">?</button>
-                <button class="player-refresh" title="Refresh player">↻</button>
+                <button class="player-refresh" title="Refresh player">&#x21bb;</button>
                 <button class="player-save">Save</button>
               </div>
             </div>
@@ -2006,18 +2298,18 @@
       container.querySelectorAll('.player-toggle').forEach((btn) => {
         const card = btn.closest('.player-card');
         const icon = btn.querySelector('span');
-        if (icon && card) icon.textContent = card.classList.contains('expanded') ? '▴' : '▾';
+        if (icon && card) icon.innerHTML = card.classList.contains('expanded') ? toggleUp : toggleDown;
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
           const card = e.currentTarget.closest('.player-card');
           if (!card) return;
           card.classList.toggle('expanded');
           const icon = btn.querySelector('span');
-          if (icon) icon.textContent = card.classList.contains('expanded') ? '▴' : '▾';
+          if (icon) icon.innerHTML = card.classList.contains('expanded') ? toggleUp : toggleDown;
         });
       });
 
-      if (!container.dataset.dragInit) {
+      if (!exportMode && !container.dataset.dragInit) {
         container.addEventListener('dragover', (e) => {
           if (!draggingCard) return;
           e.preventDefault();
@@ -2037,52 +2329,54 @@
       }
 
       container.querySelectorAll('.player-card').forEach((card) => {
-        card.draggable = false;
-        card.addEventListener('pointerdown', (e) => {
-          if (card.classList.contains('expanded')) return;
-          if (e.target.closest('.remove-btn, .player-toggle, .player-panel, input, button, a')) return;
-          card.draggable = true;
-        });
-        card.addEventListener('pointerup', () => {
+        if (!exportMode) {
           card.draggable = false;
-        });
-        card.addEventListener('dragstart', (e) => {
-          if (!card.draggable || card.classList.contains('expanded')) {
-            e.preventDefault();
-            return;
-          }
-          draggingCard = card;
-          card.classList.add('dragging');
-          hoveredPlayerKey = card.getAttribute('data-player-key') || null;
-          hoverMix = 1;
-          hoverFromKey = null;
-          hoverToKey = null;
-          if (chart) {
-            chart.$hoverMix = 1;
-            chart.$hoverFromKey = null;
-            chart.$hoverToKey = null;
-            chart.update('none');
-          }
-          e.dataTransfer.effectAllowed = 'move';
-          e.dataTransfer.setData('text/plain', card.getAttribute('data-player-id') || '');
-        });
-        card.addEventListener('dragend', () => {
-          card.classList.remove('dragging');
-          card.draggable = false;
-          draggingCard = null;
-          hoveredPlayerKey = null;
-          hoverMix = 0;
-          hoverFromKey = null;
-          hoverToKey = null;
-          if (chart) {
-            chart.$hoverMix = 0;
-            chart.$hoverFromKey = null;
-            chart.$hoverToKey = null;
-            chart.update('none');
-          }
-          const container = document.getElementById('players');
-          persistCardOrder(container);
-        });
+          card.addEventListener('pointerdown', (e) => {
+            if (card.classList.contains('expanded')) return;
+            if (e.target.closest('.remove-btn, .player-toggle, .player-panel, input, button, a')) return;
+            card.draggable = true;
+          });
+          card.addEventListener('pointerup', () => {
+            card.draggable = false;
+          });
+          card.addEventListener('dragstart', (e) => {
+            if (!card.draggable || card.classList.contains('expanded')) {
+              e.preventDefault();
+              return;
+            }
+            draggingCard = card;
+            card.classList.add('dragging');
+            hoveredPlayerKey = card.getAttribute('data-player-key') || null;
+            hoverMix = 1;
+            hoverFromKey = null;
+            hoverToKey = null;
+            if (chart) {
+              chart.$hoverMix = 1;
+              chart.$hoverFromKey = null;
+              chart.$hoverToKey = null;
+              chart.update('none');
+            }
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', card.getAttribute('data-player-id') || '');
+          });
+          card.addEventListener('dragend', () => {
+            card.classList.remove('dragging');
+            card.draggable = false;
+            draggingCard = null;
+            hoveredPlayerKey = null;
+            hoverMix = 0;
+            hoverFromKey = null;
+            hoverToKey = null;
+            if (chart) {
+              chart.$hoverMix = 0;
+              chart.$hoverFromKey = null;
+              chart.$hoverToKey = null;
+              chart.update('none');
+            }
+            const container = document.getElementById('players');
+            persistCardOrder(container);
+          });
+        }
       });
 
       container.querySelectorAll('.remove-btn').forEach((btn) => {
@@ -2334,6 +2628,7 @@
     }
 
     async function refreshData() {
+      if (exportMode) return;
       document.getElementById('subtitle').textContent = 'Loading...';
       const serverName = serverSelect ? serverSelect.value : 'US Monthly (Premium)';
       setLoading(true, 'Loading...');
@@ -2404,6 +2699,12 @@
       setRefreshStatus('Loading cached data...');
       let statusInterval = null;
       try {
+        if (exportMode && exportData) {
+          lastData = exportData;
+          applyRender(exportData);
+          setRefreshStatus('Loaded snapshot.');
+          return;
+        }
         const serverName = serverSelect ? serverSelect.value : null;
         statusInterval = setInterval(async () => {
           try {
@@ -2595,7 +2896,99 @@
       });
     }
 
+    function buildExportHtml() {
+      if (!chart || !lastData) return null;
+      const panel = document.querySelector('.panel');
+      const inlineScript = document.querySelector('body > script');
+      if (!panel || !inlineScript) return null;
+      const clone = panel.cloneNode(true);
+      clone.querySelector('#refresh')?.remove();
+      clone.querySelector('#add')?.remove();
+      clone.querySelector('.chart-settings')?.remove();
+      clone.querySelector('.chart-actions-left')?.remove();
+      clone.querySelectorAll('.remove-btn, .player-toggle, .player-panel').forEach((el) => el.remove());
+      const select = clone.querySelector('#serverSelect');
+      if (select) {
+        const staticNode = document.createElement('div');
+        staticNode.className = 'server-select server-select--static';
+        staticNode.textContent =
+          select.value || select.options[select.selectedIndex]?.textContent || 'Server';
+        select.replaceWith(staticNode);
+      }
+      const wipeEl = clone.querySelector('#wipeRange');
+      if (wipeEl && serverSelect?.value) wipeEl.textContent = formatWipeRangeLabel(serverSelect.value);
+      const styleText = document.querySelector('style')?.textContent || '';
+      const exportStyle = `
+      .server-select--static { cursor: default; }
+      .player-card .remove-btn,
+      .player-card .player-toggle,
+      .player-card .player-panel { display: none !important; }
+      `;
+      const headScripts = Array.from(document.querySelectorAll('head script[src]'))
+        .map((script) => `<scr` + `ipt src="${script.getAttribute('src')}"></scr` + `ipt>`)
+        .join('');
+      const safeJson = (value) =>
+        JSON.stringify(value)
+          .replace(/</g, '\\u003c')
+          .replace(/\u2028/g, '\\u2028')
+          .replace(/\u2029/g, '\\u2029');
+      const exportScript =
+        `<script>window.__EXPORT_DATA__=${safeJson(
+          lastData
+        )};window.__EXPORT_SERVER__=${safeJson(
+          serverSelect?.value || ''
+        )};window.__EXPORT_TAB__=${safeJson(
+          currentTab
+        )};window.__EXPORT_COLOR__=${safeJson(
+          colorMode
+        )};window.__EXPORT_SCALE__=${safeJson(scaleMode)};</scr` + `ipt>`;
+      return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rusty Moose Stats Chart</title>
+  ${headScripts}
+  <style>${styleText}${exportStyle}</style>
+</head>
+<body>
+${clone.outerHTML}
+${exportScript}
+<script>${inlineScript.textContent}</scr` + `ipt>
+</body>
+</html>`;
+    }
+
+    function downloadSnapshot(html) {
+      const serverName = serverSelect?.value || 'server';
+      const safeServer = serverName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const stamp = new Date().toISOString().slice(0, 10);
+      const filename = `moose-stats-${safeServer}-${stamp}.html`;
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    const exportButton = document.getElementById('exportSnapshot');
+    if (exportButton) {
+      exportButton.addEventListener('click', () => {
+        const html = buildExportHtml();
+        if (!html) {
+          alert('Chart not ready yet.');
+          return;
+        }
+        downloadSnapshot(html);
+      });
+    }
+
     if (addButton) addButton.addEventListener('click', async () => {
+      if (exportMode) return;
       if (addLongPressTriggered) {
         addLongPressTriggered = false;
         return;
@@ -2642,7 +3035,8 @@
       }
     });
 
-    document.getElementById('refresh').addEventListener('click', () => refreshData());
+    const refreshButton = document.getElementById('refresh');
+    if (refreshButton) refreshButton.addEventListener('click', () => refreshData());
 
     if (serverSelect) {
       const saved = localStorage.getItem('mooseServerName');
@@ -2651,6 +3045,7 @@
       }
       serverSelect.addEventListener('change', () => {
         localStorage.setItem('mooseServerName', serverSelect.value);
+        updateWipeRange();
         loadData();
       });
     }
@@ -2672,15 +3067,35 @@
 
     function updateColorToggle() {
       if (!colorToggle) return;
-      colorToggle.querySelectorAll('button').forEach((btn) => {
+      colorToggle.querySelectorAll('button[data-mode]').forEach((btn) => {
         const isActive = btn.getAttribute('data-mode') === colorMode;
         btn.classList.toggle('active', isActive);
       });
     }
 
+    function setSettingsPanel(open) {
+      if (!colorToggle) return;
+      colorToggle.classList.toggle('show', !!open);
+    }
+
+    if (settingsToggle) {
+      settingsToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!colorToggle) return;
+        colorToggle.classList.toggle('show');
+      });
+    }
+
+    document.addEventListener('click', (e) => {
+      if (!colorToggle || !colorToggle.classList.contains('show')) return;
+      const target = e.target;
+      if (colorToggle.contains(target) || settingsToggle?.contains(target)) return;
+      setSettingsPanel(false);
+    });
+
     if (colorToggle) {
       updateColorToggle();
-      colorToggle.querySelectorAll('button').forEach((btn) => {
+      colorToggle.querySelectorAll('button[data-mode]').forEach((btn) => {
         btn.addEventListener('click', () => {
           const mode = btn.getAttribute('data-mode');
           if (!mode || mode === colorMode) return;
@@ -2691,7 +3106,46 @@
             applyRender(lastData);
             if (selectedMetric) {
               const colorMap = buildColorMap(lastData.profiles || []);
-              const tabPayload = { profiles: lastData.profiles || [], stats: getActiveTabData(lastData).stats || {} };
+              const activeTab = getActiveTabData(lastData);
+              const tabPayload = {
+                profiles: lastData.profiles || [],
+                stats: activeTab.stats || {},
+                metrics: activeTab.metrics || [],
+              };
+              renderStatDetails(selectedMetric, tabPayload, colorMap);
+            }
+          }
+        });
+      });
+    }
+
+    function updateScaleToggle() {
+      if (!scaleToggle) return;
+      scaleToggle.querySelectorAll('button[data-scale]').forEach((btn) => {
+        const mode = btn.getAttribute('data-scale');
+        btn.classList.toggle('active', mode === scaleMode);
+      });
+    }
+
+    if (scaleToggle) {
+      updateScaleToggle();
+      scaleToggle.querySelectorAll('button').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const mode = btn.getAttribute('data-scale');
+          if (!mode || mode === scaleMode) return;
+          scaleMode = mode;
+          localStorage.setItem('mooseScaleMode', scaleMode);
+          updateScaleToggle();
+          if (lastData) {
+            applyRender(lastData, true);
+            if (selectedMetric) {
+              const colorMap = buildColorMap(lastData.profiles || []);
+              const activeTab = getActiveTabData(lastData);
+              const tabPayload = {
+                profiles: lastData.profiles || [],
+                stats: activeTab.stats || {},
+                metrics: activeTab.metrics || [],
+              };
               renderStatDetails(selectedMetric, tabPayload, colorMap);
             }
           }
