@@ -541,6 +541,121 @@
       pointer-events: all;
     }
 
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(9, 16, 23, 0.6);
+      backdrop-filter: blur(1px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 9998;
+    }
+
+    .modal-overlay.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      position: relative;
+      width: min(720px, 92vw);
+      background: rgba(12, 20, 28, 0.96);
+      border: 1px solid rgba(102, 192, 244, 0.35);
+      border-radius: 12px;
+      padding: 16px 18px 18px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+    }
+
+    .modal-title {
+      margin: 0 0 12px 0;
+      font-size: 22px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.12);
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.2s, box-shadow 0.2s, border-color 0.2s, background 0.2s;
+    }
+
+    .modal-close span { display: block; line-height: 1; transform: translateY(-1px); pointer-events: none; }
+    .modal-close:hover {
+      box-shadow: 0 0 12px rgba(102, 192, 244, 0.35);
+      border-color: rgba(102, 192, 244, 0.6);
+      background: rgba(255,255,255,0.1);
+    }
+
+    .modal-body {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .modal-label {
+      font-size: 11px;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .modal-textarea {
+      width: 100%;
+      min-height: 140px;
+      resize: vertical;
+      background: rgba(255,255,255,0.06);
+      color: var(--text-primary);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 13px;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    .modal-textarea:focus {
+      border-color: rgba(102, 192, 244, 0.8);
+      box-shadow: 0 0 0 1px rgba(102, 192, 244, 0.55);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 6px;
+    }
+
+    .modal-ok {
+      background: rgba(255,255,255,0.06);
+      color: var(--text-primary);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      padding: 8px 18px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .modal-ok:hover {
+      box-shadow: 0 0 16px rgba(102, 192, 244, 0.35);
+      border-color: rgba(102, 192, 244, 0.6);
+    }
+
     .color-toggle {
       position: fixed;
       right: 18px;
@@ -684,6 +799,19 @@
   <div id="colorModeToggle" class="color-toggle">
     <button type="button" data-mode="original">Original</button>
     <button type="button" data-mode="contrast">Contrast</button>
+  </div>
+  <div id="teamModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="teamModalTitle">
+      <button id="teamModalClose" class="modal-close" title="Close"><span>×</span></button>
+      <h3 id="teamModalTitle" class="modal-title">Add Team</h3>
+      <div class="modal-body">
+        <label class="modal-label" for="teamCsvInput">Steam name, Steam URL (CSV pairs)</label>
+        <textarea id="teamCsvInput" class="modal-textarea" placeholder="Name, https://steamcommunity.com/profiles/..., Name, https://steamcommunity.com/profiles/..."></textarea>
+        <div class="modal-actions">
+          <button id="teamModalOk" class="modal-ok">Ok</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -2331,7 +2459,145 @@
       }
     }
 
-    document.getElementById('add').addEventListener('click', async () => {
+    const addButton = document.getElementById('add');
+    const teamModal = document.getElementById('teamModal');
+    const teamModalClose = document.getElementById('teamModalClose');
+    const teamModalOk = document.getElementById('teamModalOk');
+    const teamCsvInput = document.getElementById('teamCsvInput');
+    let addLongPressTimer = null;
+    let addLongPressTriggered = false;
+    const LONG_PRESS_MS = 650;
+
+    function openTeamModal() {
+      if (!teamModal) return;
+      teamModal.classList.add('show');
+      teamModal.setAttribute('aria-hidden', 'false');
+      if (teamCsvInput) {
+        teamCsvInput.value = '';
+        teamCsvInput.focus();
+      }
+    }
+
+    function closeTeamModal() {
+      if (!teamModal) return;
+      teamModal.classList.remove('show');
+      teamModal.setAttribute('aria-hidden', 'true');
+    }
+
+    function parseTeamCsv(text) {
+      const tokens = String(text || '')
+        .replace(/[\r\n]+/g, ',')
+        .split(',')
+        .map((token) => token.trim())
+        .filter(Boolean);
+      const entries = [];
+      for (let i = 0; i < tokens.length; i += 2) {
+        const name = tokens[i] || '';
+        const url = tokens[i + 1] || '';
+        if (!url) continue;
+        entries.push({ name, url });
+      }
+      return entries;
+    }
+
+    async function addPlayerByUrl(steamUrl, steamName) {
+      const resp = await fetch('/api/players', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          steamUrl,
+          steamName,
+          serverName: serverSelect ? serverSelect.value : null,
+        }),
+      });
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err.error || 'Add failed');
+      }
+      return resp.json();
+    }
+
+    if (addButton) {
+      addButton.addEventListener('pointerdown', (e) => {
+        if (e.button != null && e.button !== 0) return;
+        addLongPressTriggered = false;
+        if (addLongPressTimer) clearTimeout(addLongPressTimer);
+        addLongPressTimer = setTimeout(() => {
+          addLongPressTriggered = true;
+          openTeamModal();
+        }, LONG_PRESS_MS);
+      });
+      addButton.addEventListener('pointerup', () => {
+        if (addLongPressTimer) clearTimeout(addLongPressTimer);
+      });
+      addButton.addEventListener('pointerleave', () => {
+        if (addLongPressTimer) clearTimeout(addLongPressTimer);
+      });
+      addButton.addEventListener('pointercancel', () => {
+        if (addLongPressTimer) clearTimeout(addLongPressTimer);
+      });
+    }
+
+    if (teamModal) {
+      teamModal.addEventListener('click', (e) => {
+        if (e.target === teamModal) closeTeamModal();
+      });
+    }
+    if (teamModalClose) teamModalClose.addEventListener('click', () => closeTeamModal());
+
+    if (teamModalOk) {
+      teamModalOk.addEventListener('click', async () => {
+        const entries = parseTeamCsv(teamCsvInput ? teamCsvInput.value : '');
+        if (!entries.length) {
+          alert('Enter Steam name and Steam URL pairs.');
+          return;
+        }
+        closeTeamModal();
+        let statusInterval = null;
+        try {
+          setLoading(true, 'Adding team...');
+          setRefreshStatus('Adding team...');
+          statusInterval = setInterval(async () => {
+            try {
+              const resp = await fetch('/api/refresh-status');
+              if (resp.ok) {
+                const data = await resp.json();
+                setRefreshStatus(data.message || '');
+              }
+            } catch {
+              // ignore status errors
+            }
+          }, 1000);
+          let lastResponse = null;
+          for (let i = 0; i < entries.length; i += 1) {
+            const entry = entries[i];
+            setRefreshStatus(`Adding ${entry.name || entry.url}... (${i + 1}/${entries.length})`);
+            try {
+              lastResponse = await addPlayerByUrl(entry.url, entry.name);
+            } catch (err) {
+              console.warn('[add team] skipped', entry.url, err);
+            }
+          }
+          if (lastResponse && lastResponse.tabs) {
+            lastData = lastResponse;
+            applyRender(lastResponse);
+          } else {
+            await loadData();
+          }
+        } catch (err) {
+          alert(err.message || 'Error adding team');
+        } finally {
+          if (statusInterval) clearInterval(statusInterval);
+          setLoading(false);
+        }
+      });
+    }
+
+    if (addButton) addButton.addEventListener('click', async () => {
+      if (addLongPressTriggered) {
+        addLongPressTriggered = false;
+        return;
+      }
       const url = prompt('Enter Steam profile URL (id or profiles link)');
       if (!url) return;
       let statusInterval = null;
