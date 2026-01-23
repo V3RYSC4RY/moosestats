@@ -103,7 +103,14 @@
       z-index: 4;
       transition: opacity 0.2s, box-shadow 0.2s, border-color 0.2s, background 0.2s;
     }
-    .remove-btn span { display: block; line-height: 1; transform: translateY(-1px); }
+    .remove-btn span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      line-height: 1;
+    }
     .avatar { width: 42px; height: 42px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.08); object-fit: cover; background: #091017; }
     .player-meta { display: flex; flex-direction: column; gap: 2px; }
     .player-name { font-weight: 500; color: var(--text-primary); }
@@ -268,7 +275,15 @@
       justify-content: center;
       transition: opacity 0.2s, box-shadow 0.2s, border-color 0.2s, background 0.2s;
     }
-    .stat-details .panel-close span { display: block; line-height: 1; transform: translateY(-1px); pointer-events: none; }
+    .stat-details .panel-close span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      line-height: 1;
+      pointer-events: none;
+    }
     .stat-details:hover .panel-close { opacity: 1; }
     .stat-details .panel-close:hover {
       box-shadow: 0 0 12px rgba(102, 192, 244, 0.35);
@@ -439,6 +454,79 @@
       font-size: 28px;
       font-weight: 400;
     }
+    .stat-details.export-mode { width: min(1180px, 96%); }
+    .stat-details.export-mode .stat-list { gap: 0; }
+    .stat-details.export-mode .stat-groups {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .stat-details.export-mode .stat-section {
+      background: rgba(8, 14, 20, 0.55);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .stat-details.export-mode .stat-section-title {
+      font-size: 12px;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      color: rgba(155,182,204,0.75);
+    }
+    .stat-details.export-mode .stat-category {
+      background: rgba(12, 20, 28, 0.8);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .stat-details.export-mode .stat-category-title {
+      font-size: 14px;
+      color: var(--text-primary);
+      letter-spacing: 0.2px;
+    }
+    .stat-details.export-mode .stat-compact {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .stat-details.export-mode .stat-row {
+      grid-template-columns: 40px minmax(0, 1fr) auto;
+      align-items: center;
+      padding: 6px 8px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.03);
+      border: none;
+      font-variant-numeric: tabular-nums;
+      min-width: 0;
+    }
+    .stat-details.export-mode .stat-row .stat-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .stat-details.export-mode .stat-row .stat-value {
+      text-align: right;
+      color: var(--text-primary);
+    }
+    .stat-details.export-mode .stat-rank {
+      width: auto;
+      height: auto;
+      padding: 2px 6px;
+      border-radius: 999px;
+      font-size: 11px;
+    }
+    @media (max-width: 1200px) {
+      .stat-details.export-mode .stat-groups { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 900px) {
+      .stat-details.export-mode .stat-groups { grid-template-columns: 1fr; }
+    }
 
     .stat-header-overlay {
       position: absolute;
@@ -473,6 +561,19 @@
     .stat-header-btn.hovered {
       box-shadow: 0 0 16px rgba(102, 192, 244, 0.35);
       border-color: rgba(102, 192, 244, 0.6);
+    }
+    .export-mode .stat-header-btn {
+      cursor: default;
+      pointer-events: none;
+      box-shadow: none;
+    }
+    .export-mode .stat-header-btn:hover,
+    .export-mode .stat-header-btn.active,
+    .export-mode .stat-header-btn.hovered {
+      box-shadow: none;
+      border-color: rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color: #fff;
     }
     .stats-header {
       display: flex;
@@ -638,7 +739,15 @@
       transition: opacity 0.2s, box-shadow 0.2s, border-color 0.2s, background 0.2s;
     }
 
-    .modal-close span { display: block; line-height: 1; transform: translateY(-1px); pointer-events: none; }
+    .modal-close span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      line-height: 1;
+      pointer-events: none;
+    }
     .modal-close:hover {
       box-shadow: 0 0 12px rgba(102, 192, 244, 0.35);
       border-color: rgba(102, 192, 244, 0.6);
@@ -679,7 +788,7 @@
 
     .modal-actions {
       display: flex;
-      justify-content: flex-end;
+      justify-content: center;
       margin-top: 6px;
     }
 
@@ -990,6 +1099,7 @@
       if (window.__EXPORT_TAB__) currentTab = window.__EXPORT_TAB__;
       if (window.__EXPORT_COLOR__) colorMode = window.__EXPORT_COLOR__;
       if (window.__EXPORT_SCALE__) scaleMode = window.__EXPORT_SCALE__;
+      document.body.classList.add('export-mode');
     }
 
     function getProfileKey(profile) {
@@ -1325,6 +1435,7 @@
       const title = document.getElementById('statDetailsTitle');
       const list = document.getElementById('statDetailsList');
       if (!panel || !title || !list || !metric || !data) return;
+      panel.classList.toggle('export-mode', exportMode);
       const allMetrics = (data.metrics || []).slice();
       const assignRanks = (items) => {
         let lastValue = null;
@@ -1337,7 +1448,7 @@
           return { ...item, rank: currentRank };
         });
       };
-      title.textContent = exportMode ? 'All Categories' : metric;
+      title.textContent = exportMode ? 'Leaderboard' : metric;
       const toOrdinal = (n) => {
         const mod100 = n % 100;
         if (mod100 >= 11 && mod100 <= 13) return `${n}th`;
@@ -1353,10 +1464,34 @@
         }
       };
       if (exportMode) {
-        const groups = allMetrics
-          .map((metricLabel) => {
-            const rows = assignRanks(
-              (data.profiles || [])
+        const buildMetricOrder = (metrics, tabKey) => {
+          if (tabKey === 'pvp') {
+            const priority = [
+              'KDR',
+              'PvP Kills',
+              'Shots Hit',
+              'Shots Fired',
+              'PvP Deaths',
+              'Suicides',
+              'Headshots',
+              'Headshot %',
+            ];
+            const priorityMap = new Map();
+            metrics.forEach((metric) => {
+              priorityMap.set(metric.toLowerCase(), metric);
+            });
+            const ordered = priority
+              .map((label) => priorityMap.get(label.toLowerCase()))
+              .filter(Boolean);
+            const remaining = metrics.filter((metric) => !ordered.includes(metric));
+            return [...ordered, ...remaining];
+          }
+          return metrics.slice();
+        };
+        const metricOrder = buildMetricOrder(allMetrics, currentTab);
+        const buildRowsForMetric = (metricLabel) =>
+          assignRanks(
+            (data.profiles || [])
               .map((p) => {
                 const statsKey = p.displayName || p.fallbackName || p.steamId;
                 const raw = data.stats && data.stats[statsKey] ? data.stats[statsKey][metricLabel] : 0;
@@ -1364,40 +1499,48 @@
                 return { key: statsKey, value, profile: p };
               })
               .sort((a, b) => b.value - a.value)
-            ).map((item) => {
-                const displayName = item.profile.displayName || item.profile.fallbackName || item.key;
-                const color = colorMap[displayName] || colorMap[item.key] || item.profile.color || '#66c0f4';
-                const rank = item.rank;
-                const rankColor =
-                  rank === 1 ? '#d4af37' : rank === 2 ? '#c0c0c0' : rank === 3 ? '#cd7f32' : '#ffffff';
-                const displayValue =
-                  metricLabel === 'Headshot %'
-                    ? `${formatNumber(item.value ?? 0)}%`
-                    : formatNumber(item.value ?? 0);
-                const rankClass = rank <= 3 ? `rankBadge rank${rank}` : 'stat-rank';
-                const rankLabel = toOrdinal(rank);
-                return `
-                  <div class="stat-group-item" style="border-left: 3px solid ${color};">
-                    <span class="${rankClass}" style="color:${rankColor}">${rankLabel}${
-                  rank <= 3 ? '<span class="milling"></span>' : ''
-                }</span>
-                    <span class="stat-name" style="color:${color}">${displayName}</span>
-                    <strong class="stat-value" style="color:${color}">${displayValue}</strong>
-                  </div>
-                `;
-              })
-              .join('');
+          );
+        const renderRow = (item) => {
+          const displayName = item.profile.displayName || item.profile.fallbackName || item.key;
+          const color = colorMap[displayName] || colorMap[item.key] || item.profile.color || '#66c0f4';
+          const rank = item.rank;
+          const rankColor =
+            rank === 1 ? '#d4af37' : rank === 2 ? '#c0c0c0' : rank === 3 ? '#cd7f32' : '#ffffff';
+          const displayValue =
+            item.metricLabel === 'Headshot %'
+              ? `${formatNumber(item.value ?? 0)}%`
+              : formatNumber(item.value ?? 0);
+          const rankClass = rank <= 3 ? `rankBadge rank${rank}` : 'stat-rank';
+          const rankLabel = toOrdinal(rank);
+          const rowClass = `stat-row rank-${rank}`;
+          return `
+            <div class="${rowClass}" style="border-left: 3px solid ${color};">
+              <span class="${rankClass}" style="color:${rankColor}">${rankLabel}${
+            rank <= 3 ? '<span class="milling"></span>' : ''
+          }</span>
+              <span class="stat-name" style="color:${color}" title="${displayName}">${displayName}</span>
+              <strong class="stat-value">${displayValue}</strong>
+            </div>
+          `;
+        };
+        const categoriesHtml = metricOrder
+          .map((metricLabel) => {
+            const rows = buildRowsForMetric(metricLabel).map((row) => ({
+              ...row,
+              metricLabel,
+            }));
+            const compactHtml = rows.map((row) => renderRow(row)).join('');
             return `
-              <div class="stat-group">
-                <div class="stat-group-title">${metricLabel}</div>
-                <div class="stat-group-list">
-                  ${rows}
+              <div class="stat-category">
+                <div class="stat-category-title">${metricLabel}</div>
+                <div class="stat-compact">
+                  ${compactHtml}
                 </div>
               </div>
             `;
           })
           .join('');
-        list.innerHTML = groups;
+        list.innerHTML = `<div class="stat-groups">${categoriesHtml}</div>`;
         panel.style.display = 'block';
         return;
       }
@@ -1453,8 +1596,8 @@
       container.innerHTML = labels
         .map((label, idx) => {
           const left = xScale.getPixelForValue(idx);
-          const isActive = label === selectedMetric;
-          const isHovered = label === hoveredMetric;
+          const isActive = !exportMode && label === selectedMetric;
+          const isHovered = !exportMode && label === hoveredMetric;
           return `
             <button type="button"
               class="stat-header-btn${isActive ? ' active' : ''}${isHovered ? ' hovered' : ''}"
@@ -1467,6 +1610,7 @@
         .join('');
       container.querySelectorAll('.stat-header-btn').forEach((btn) => {
         btn.addEventListener('click', () => {
+          if (exportMode) return;
           const metric = btn.getAttribute('data-metric');
           if (!metric || !lastData) return;
           selectedMetric = metric;
@@ -1533,7 +1677,14 @@
       const tabLabel = TAB_LABELS[currentTab] || currentTab;
       document.getElementById('subtitle').textContent =
         data.serverName + ' - ' + tabLabel + ' - ' + (tabData.metrics || []).join(' - ') + missingNote;
-      if (selectedMetric) {
+      if (exportMode) {
+        const tabPayload = {
+          profiles: data.profiles || [],
+          stats: tabData.stats || {},
+          metrics: tabData.metrics || [],
+        };
+        renderStatDetails('Leaderboard', tabPayload, colorMap);
+      } else if (selectedMetric) {
         const tabPayload = {
           profiles: data.profiles || [],
           stats: tabData.stats || {},
@@ -1856,8 +2007,10 @@
         chart.options.scales.y.type = scaleMode === 'log' ? 'logarithmic' : 'linear';
         chart.options.scales.y.min =
           scaleMode === 'log' ? Math.max(logMinValue || 0.1, 1e-6) : 0;
-        chart.options.onClick = (event, elements, chartInstance) =>
+        chart.options.onClick = exportMode ? null : (event, elements, chartInstance) =>
           handleChartClick(event, chartInstance);
+        chart.options.events = exportMode ? [] : undefined;
+        chart.options.plugins.tooltip.enabled = !exportMode;
         updateChartHoverStyles();
         chart.$tickMode = animate;
         if (animate) {
@@ -2022,7 +2175,7 @@
               },
             },
           },
-          onClick: (event, elements, chartInstance) => handleChartClick(event, chartInstance),
+          onClick: exportMode ? null : (event, elements, chartInstance) => handleChartClick(event, chartInstance),
           scales: {
             x: {
               type: 'linear',
@@ -2056,11 +2209,12 @@
             },
           },
         layout: { padding: { top: labelPaddingTop, right: 18, bottom: labelRowPadding, left: 18 } }, // add padding for bar breathing room
+          events: exportMode ? [] : undefined,
           plugins: {
             legend: { display: false },
             tooltip: {
-              enabled: false,
-              external: externalTooltipHandler,
+              enabled: !exportMode,
+              external: exportMode ? null : externalTooltipHandler,
             },
             zoom: {
               pan: { enabled: true, mode: 'xy' },
@@ -2091,35 +2245,37 @@
         const el = document.getElementById('chartjs-external-tooltip');
         if (el) el.style.opacity = '0';
       };
-      chartCtx.canvas.addEventListener('mouseleave', hideTooltip);
-      chartCtx.canvas.addEventListener('mousemove', (event) => {
-        if (!chart) return;
-        const hit = chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
-        if (!hit || hit.length === 0) hideTooltip();
-      });
-      chartCtx.canvas.addEventListener('mousemove', (event) => {
-        if (!chart) return;
-        const { chartArea, scales } = chart;
-        const xScale = scales?.x;
-        if (!xScale || !chartArea) return;
-        const x = event.offsetX;
-        const y = event.offsetY;
-        if (x < chartArea.left || x > chartArea.right || y < chartArea.top || y > chartArea.bottom) {
-          if (hoveredMetric) {
-            hoveredMetric = null;
+      if (!exportMode) {
+        chartCtx.canvas.addEventListener('mouseleave', hideTooltip);
+        chartCtx.canvas.addEventListener('mousemove', (event) => {
+          if (!chart) return;
+          const hit = chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
+          if (!hit || hit.length === 0) hideTooltip();
+        });
+        chartCtx.canvas.addEventListener('mousemove', (event) => {
+          if (!chart) return;
+          const { chartArea, scales } = chart;
+          const xScale = scales?.x;
+          if (!xScale || !chartArea) return;
+          const x = event.offsetX;
+          const y = event.offsetY;
+          if (x < chartArea.left || x > chartArea.right || y < chartArea.top || y > chartArea.bottom) {
+            if (hoveredMetric) {
+              hoveredMetric = null;
+              updateHeaderHover();
+            }
+            return;
+          }
+          const value = xScale.getValueForPixel(x);
+          const index = Math.round(value);
+          const labels = chart.data.labels || [];
+          const nextMetric = labels[index] || null;
+          if (nextMetric !== hoveredMetric) {
+            hoveredMetric = nextMetric;
             updateHeaderHover();
           }
-          return;
-        }
-        const value = xScale.getValueForPixel(x);
-        const index = Math.round(value);
-        const labels = chart.data.labels || [];
-        const nextMetric = labels[index] || null;
-        if (nextMetric !== hoveredMetric) {
-          hoveredMetric = nextMetric;
-          updateHeaderHover();
-        }
-      });
+        });
+      }
     }
 
     function updateChartHoverStyles() {
@@ -2185,6 +2341,7 @@
     }
 
     function handleChartClick(event, chartInstance) {
+      if (exportMode) return;
       if (!lastData || !chartInstance) return;
       const { chartArea, scales } = chartInstance;
       const xScale = scales?.x;
@@ -2714,6 +2871,8 @@
       try {
         if (exportMode && exportData) {
           lastData = exportData;
+          selectedMetric = null;
+          userSelectedMetric = false;
           applyRender(exportData);
           setRefreshStatus('Loaded snapshot.');
           return;
