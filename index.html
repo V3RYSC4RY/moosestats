@@ -3134,7 +3134,12 @@ ${exportScript}
     function downloadSnapshot(html) {
       const serverName = serverSelect?.value || 'server';
       const safeServer = serverName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-      const stamp = new Date().toISOString().slice(0, 10);
+      const now = new Date();
+      const stamp = [
+        now.getFullYear(),
+        String(now.getMonth() + 1).padStart(2, '0'),
+        String(now.getDate()).padStart(2, '0'),
+      ].join('-');
       const filename = `moose-stats-${safeServer}-${stamp}.html`;
       const blob = new Blob([html], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
