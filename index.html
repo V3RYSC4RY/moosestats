@@ -720,7 +720,8 @@
 
     function getProfileKey(profile) {
       if (!profile) return null;
-      return profile.playerId || profile.steamId || profile.displayName || profile.fallbackName || null;
+      const raw = profile.playerId ?? profile.steamId ?? profile.displayName ?? profile.fallbackName ?? null;
+      return raw == null ? null : String(raw);
     }
 
     function getCardOrderKeys(container) {
@@ -1296,7 +1297,7 @@
 
       const datasets = activeProfiles.map((p, datasetIndex) => {
         const statsKey = p.displayName || p.fallbackName;
-        const orderKey = getProfileKey(p) || statsKey;
+        const orderKey = getProfileKey(p) || (statsKey != null ? String(statsKey) : null);
         const playerStats = stats[statsKey];
         const realValues = metrics.map((m) => {
           const raw = playerStats[m] ?? 0;
