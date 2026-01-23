@@ -718,6 +718,11 @@
     let hoverToKey = null;
     let draggingCard = null;
 
+    function getProfileKey(profile) {
+      if (!profile) return null;
+      return profile.playerId || profile.steamId || profile.displayName || profile.fallbackName || null;
+    }
+
     function getCardOrderKeys(container) {
       if (!container) return [];
       return Array.from(container.querySelectorAll('.player-card'))
@@ -736,12 +741,12 @@
       if (!lastData || !Array.isArray(lastData.profiles)) return;
       const map = new Map();
       lastData.profiles.forEach((p) => {
-        const key = p.steamId || p.displayName || p.fallbackName;
+        const key = getProfileKey(p);
         if (key) map.set(key, p);
       });
       const ordered = keys.map((k) => map.get(k)).filter(Boolean);
       const remainder = lastData.profiles.filter((p) => {
-        const key = p.displayName || p.fallbackName;
+        const key = getProfileKey(p);
         return !keys.includes(key);
       });
       lastData.profiles = [...ordered, ...remainder];
@@ -1290,7 +1295,9 @@
       const edgePadUnits = metrics.length <= 6 ? 0.45 : metrics.length <= 9 ? 0.3 : 0.2;
 
       const datasets = activeProfiles.map((p, datasetIndex) => {
-        const playerStats = stats[p.displayName || p.fallbackName];
+        const statsKey = p.displayName || p.fallbackName;
+        const orderKey = getProfileKey(p) || statsKey;
+        const playerStats = stats[statsKey];
         const realValues = metrics.map((m) => {
           const raw = playerStats[m] ?? 0;
           return m === 'Headshot %' ? Math.round(raw) : raw;
@@ -1299,22 +1306,20 @@
         realValues.forEach((v, idx) => {
           if (typeof v === 'number' && v > maxValue) maxValue = v;
           if (typeof v === 'number' && v > 0) {
-            const key = p.displayName || p.fallbackName;
             dataPoints.push({
               x: idx,
               y: v,
               _metricIndex: idx,
-              _key: key,
+              _key: statsKey,
               _datasetIndex: datasetIndex,
             });
           }
         });
-        const key = p.displayName || p.fallbackName;
-        const color = colorMap[key] || p.color || '#66c0f4';
+        const color = colorMap[statsKey] || p.color || '#66c0f4';
         return {
-          label: p.displayName || p.fallbackName,
-          _playerKey: key,
-          _displayName: p.displayName || p.fallbackName,
+          label: statsKey,
+          _playerKey: orderKey,
+          _displayName: statsKey,
           _baseColor: color,
           _baseBg: hexToRgba(color, 0.35),
           data: dataPoints,
@@ -1827,7 +1832,7 @@
       container.innerHTML = profiles
         .map(
           (p) => `
-          <div class="player-card" data-player-id="${p.playerId ?? ''}" data-player-key="${p.steamId || p.displayName || p.fallbackName || ''}" data-steamid="${p.steamId || ''}" data-needs-steam64="${p.needsSteam64 ? '1' : '0'}" style="border-color:${hexToRgba(colorMap[p.displayName || p.fallbackName] || p.color || '#66c0f4', 0.35)}; opacity:${p.missing === true ? '0.6' : '1'};">
+          <div class="player-card" data-player-id="${p.playerId ?? ''}" data-player-key="${getProfileKey(p) || ''}" data-steamid="${p.steamId || ''}" data-needs-steam64="${p.needsSteam64 ? '1' : '0'}" style="border-color:${hexToRgba(colorMap[p.displayName || p.fallbackName] || p.color || '#66c0f4', 0.35)}; opacity:${p.missing === true ? '0.6' : '1'};">
             <button class="remove-btn" data-steamid="${p.steamId || ''}" data-steamurl="${p.steamUrl || ''}" title="Remove"><span>×</span></button>
             <a class="player-link" href="${p.steamUrl}" target="_blank" rel="noopener noreferrer">
               <img class="avatar" src="${p.avatarUrl || FALLBACK_AVATAR}" alt="${p.displayName || p.fallbackName} avatar" />
