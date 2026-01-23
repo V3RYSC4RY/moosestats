@@ -1326,6 +1326,17 @@
       const list = document.getElementById('statDetailsList');
       if (!panel || !title || !list || !metric || !data) return;
       const allMetrics = (data.metrics || []).slice();
+      const assignRanks = (items) => {
+        let lastValue = null;
+        let currentRank = 0;
+        return items.map((item) => {
+          if (lastValue == null || item.value !== lastValue) {
+            currentRank += 1;
+            lastValue = item.value;
+          }
+          return { ...item, rank: currentRank };
+        });
+      };
       title.textContent = exportMode ? 'All Categories' : metric;
       const toOrdinal = (n) => {
         const mod100 = n % 100;
@@ -1344,7 +1355,8 @@
       if (exportMode) {
         const groups = allMetrics
           .map((metricLabel) => {
-            const rows = (data.profiles || [])
+            const rows = assignRanks(
+              (data.profiles || [])
               .map((p) => {
                 const statsKey = p.displayName || p.fallbackName || p.steamId;
                 const raw = data.stats && data.stats[statsKey] ? data.stats[statsKey][metricLabel] : 0;
@@ -1352,10 +1364,10 @@
                 return { key: statsKey, value, profile: p };
               })
               .sort((a, b) => b.value - a.value)
-              .map((item, index) => {
+            ).map((item) => {
                 const displayName = item.profile.displayName || item.profile.fallbackName || item.key;
                 const color = colorMap[displayName] || colorMap[item.key] || item.profile.color || '#66c0f4';
-                const rank = index + 1;
+                const rank = item.rank;
                 const rankColor =
                   rank === 1 ? '#d4af37' : rank === 2 ? '#c0c0c0' : rank === 3 ? '#cd7f32' : '#ffffff';
                 const displayValue =
@@ -1390,7 +1402,8 @@
         return;
       }
 
-      const rows = (data.profiles || [])
+      const rows = assignRanks(
+        (data.profiles || [])
         .map((p) => {
           const statsKey = p.displayName || p.fallbackName || p.steamId;
           const raw = data.stats && data.stats[statsKey] ? data.stats[statsKey][metric] : 0;
@@ -1398,10 +1411,10 @@
           return { key: statsKey, value, profile: p };
         })
         .sort((a, b) => b.value - a.value)
-        .map((item, index) => {
+      ).map((item) => {
           const displayName = item.profile.displayName || item.profile.fallbackName || item.key;
           const color = colorMap[displayName] || colorMap[item.key] || item.profile.color || '#66c0f4';
-          const rank = index + 1;
+          const rank = item.rank;
           const rankColor =
             rank === 1 ? '#d4af37' : rank === 2 ? '#c0c0c0' : rank === 3 ? '#cd7f32' : '#ffffff';
           const displayValue =
