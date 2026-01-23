@@ -1346,10 +1346,10 @@
           .map((metricLabel) => {
             const rows = (data.profiles || [])
               .map((p) => {
-                const key = p.steamId || p.displayName || p.fallbackName;
-                const raw = data.stats && data.stats[key] ? data.stats[key][metricLabel] : 0;
+                const statsKey = p.displayName || p.fallbackName || p.steamId;
+                const raw = data.stats && data.stats[statsKey] ? data.stats[statsKey][metricLabel] : 0;
                 const value = metricLabel === 'Headshot %' ? Math.round(raw) : raw;
-                return { key, value, profile: p };
+                return { key: statsKey, value, profile: p };
               })
               .sort((a, b) => b.value - a.value)
               .map((item, index) => {
@@ -1392,10 +1392,10 @@
 
       const rows = (data.profiles || [])
         .map((p) => {
-          const key = p.steamId || p.displayName || p.fallbackName;
-          const raw = data.stats && data.stats[key] ? data.stats[key][metric] : 0;
+          const statsKey = p.displayName || p.fallbackName || p.steamId;
+          const raw = data.stats && data.stats[statsKey] ? data.stats[statsKey][metric] : 0;
           const value = metric === 'Headshot %' ? Math.round(raw) : raw;
-          return { key, value, profile: p };
+          return { key: statsKey, value, profile: p };
         })
         .sort((a, b) => b.value - a.value)
         .map((item, index) => {
